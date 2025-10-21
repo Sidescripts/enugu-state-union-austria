@@ -118,7 +118,7 @@ const startServer = async () => {
     
     try {
         await connectDB();
-        await runMigrations()
+        // await runMigrations()
         server = app.listen(port, () => { // ✅ Store server instance
             logger.info(`Server running on http://localhost:${port}`);
         });
