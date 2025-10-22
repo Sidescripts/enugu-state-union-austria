@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events & Announcements - Enugu State Union Austria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/announcement.css">
+    <style>
+        :root {
+            --primary-black: #121212;
+            --primary-white: #FFFFFF;
+            --primary-green: #00C853;
+            --accent-green: #00E676;
+            --light-green: #B9F6CA;
+            --dark-green: #009624;
+            --gray-light: #f5f5f5;
+            --gray-dark: #2a2a2a;
+            --text-light: #212121;
+            --text-dark: #f5f5f5;
+            --bg-light: #ffffff;
+            --bg-dark: #1a1a1a;
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #2a2a2a;
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --notification-red: #ff4757;
+            --notification-pulse: #ff3838;
+        }
+        .light-mode {
+            --bg-color: var(--bg-light);
+            --text-color: var(--text-light);
+            --card-bg: var(--card-bg-light);
+        }
+        .dark-mode {
+            --bg-color: var(--bg-dark);
+            --text-color: var(--text-dark);
+            --card-bg: var(--card-bg-dark);
+        }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            line-height: 1.6;
+            padding-top: 80px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+        .navbar {
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 20px rgba(0, 200, 83, 0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-white) !important;
+            display: flex;
+            align-items: center;
+        }
+        .navbar-brand img {
+            margin-right: 10px;
+            border-radius: 8px;
+        }
+        .navbar-nav .nav-link {
+            color: var(--primary-white) !important;
+            font-weight: 500;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 15px !important;
+            border-radius: 8px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--primary-green) !important;
+            background: rgba(0, 200, 83, 0.1);
+        }
+        .navbar-nav .nav-link.active {
+            color: var(--primary-green) !important;
+            background: rgba(0, 200, 83, 0.15);
+        }
+        .nav-notification {
+            position: relative;
+        }
+        .notification-dot {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 10px;
+            height: 10px;
+            background-color: var(--notification-red);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .navbar-toggler {
+            border: none;
+            color: var(--primary-white) !important;
+            font-size: 1.5rem;
+        }
+        .mode-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--primary-white);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+        .mode-toggle:hover {
+            background: var(--primary-green);
+            transform: rotate(15deg);
+        }
+        .section-title {
+            position: relative;
+            font-weight: 700;
+            margin-bottom: 60px;
+            text-align: center;
+            color: var(--primary-green);
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-green), var(--accent-green));
+            border-radius: 2px;
+        }
+        .new-announcement-banner {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            margin-top: 4rem;
+            margin-bottom: 40px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 1s ease-out;
+        }
+        .new-announcement-banner h3 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .new-announcement-banner .pulse-icon {
+            background-color: var(--notification-red);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 10;
+            animation: pulse 2s infinite;
+            margin-right: 20px;
+        }
+        .events-section {
+            padding: 100px 0;
+            background: var(--bg-color);
+        }
+        .event-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        .new-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--notification-red);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 10;
+            animation: pulse 2s infinite;
+        }
+        .event-image {
+            height: 250px;
+            overflow: hidden;
+        }
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .event-card:hover .event-image img {
+            transform: scale(1.1);
+        }
+        .event-content {
+            padding: 25px;
+        }
+        .event-date {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .event-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        .event-description {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        .event-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .event-location, .event-time {
+            display: flex;
+            align-items: center;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        .event-location i, .event-time i {
+            margin-right: 8px;
+            color: var(--primary-green);
+        }
+        .btn-event {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-event:hover {
+            background: var(--accent-green);
+            transform: translateY(-2px);
+        }
+        .announcements-section {
+            padding: 100px 0;
+            background: var(--gray-light);
+        }
+        .dark-mode .announcements-section {
+            background: var(--gray-dark);
+        }
+        .announcement-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .announcement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .announcement-new {
+            border-left: 5px solid var(--notification-red);
+        }
+        .new-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--notification-red);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .announcement-date {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .announcement-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        .announcement-content {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        .announcement-image {
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .announcement-image img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        footer {
+            background: var(--primary-black);
+            color: var(--primary-white);
+            padding: 80px 0 30px;
+        }
+        .footer-title {
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--primary-green);
+            font-size: 1.5rem;
+        }
+        .footer-links a {
+            color: var(--primary-white);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: block;
+            margin-bottom: 12px;
+            opacity: 0.8;
+        }
+        .footer-links a:hover {
+            color: var(--primary-green);
+            opacity: 1;
+        }
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary-white);
+            font-size: 1.5rem;
+            border-radius: 50%;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+        }
+        .social-icons a:hover {
+            background: var(--primary-green);
+            transform: translateY(-5px);
+        }
+        .newsletter-form {
+            display: flex;
+            margin-top: 20px;
+        }
+        .newsletter-input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px 0 0 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .newsletter-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 0 50px 50px 0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .newsletter-btn:hover {
+            background: var(--accent-green);
+        }
+        .copyright {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            opacity: 0.7;
+        }
+        .loading-spinner {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-color);
+        }
+        .loading-spinner i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+        .error-message {
+            text-align: center;
+            padding: 50px;
+            color: var(--notification-red);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 56, 56, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 56, 56, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 56, 56, 0); }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 10px 0; }
+            .section-title { font-size: 2rem; }
+            .newsletter-form { flex-direction: column; }
+            .newsletter-input { border-radius: 50px; margin-bottom: 10px; }
+            .newsletter-btn { border-radius: 50px; padding: 12px; }
+            .new-announcement-banner .pulse-icon {
+                padding: 6px 10px 5px 10px;
+                margin-left: 20px;
+                margin-right: 0;
+            }
+            .events-section { padding: 20px 0; }
+            .announcements-section { padding: 20px 0; }
+        }
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+        }
+        .notification {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            background-color: var(--primary-green);
+        }
+        .notification-content {
+            flex: 1;
+        }
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .notification-message {
+            font-size: 14px;
+            color: var(--text-color);
+        }
+        .notification-close {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <img src="../img/logo.png" alt="ESUA Logo" class="brand-logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="../pages/annoucement.html">Announcements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../pages/contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="mode-toggle" id="modeToggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="new-announcement-banner" id="new-announcement-banner" style="display: none;">
+            <h3><i class="fas fa-bell pulse-icon"></i> New Announcements Posted This Week!</h3>
+        </div>
+    </div>
+
+    <section id="events" class="events-section">
+        <div class="container">
+            <h2 class="section-title">Upcoming Events</h2>
+            <div class="row" id="events-list">
+                <div class="col-lg-12">
+                    <div class="loading-spinner"><i class="fas fa-spinner"></i> Loading events...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="announcements" class="announcements-section">
+        <div class="container">
+            <h2 class="section-title">Latest Announcements</h2>
+            <div class="row" id="announcements-list">
+                <div class="col-lg-12">
+                    <div class="loading-spinner"><i class="fas fa-spinner"></i> Loading announcements...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <h5 class="footer-title">Enugu State Union Austria</h5>
+                    <p>Promoting unity, culture, and progress for Enugu State citizens in Austria.</p>
+                    <div class="social-icons mt-4">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <div class="footer-links">
+                        <a href="../index.html">Home</a>
+                        <a href="../index.html#about">About Us</a>
+                        <a href="../index.html#executives">Executives</a>
+                        <a href="../index.html#events">Events</a>
+                        <a href="../index.html#videos">Videos</a>
+                        <a href="../index.html#contact">Contact</a>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="footer-title">Newsletter</h5>
+                    <p>Subscribe to our newsletter for updates on events and activities.</p>
+                    <div class="newsletter-form">
+                        <input type="email" class="newsletter-input" placeholder="Your Email">
+                        <button class="newsletter-btn">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center copyright">
+                <p>&copy; <span id="year"></span> Enugu State Union Austria. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script>
+        const BASE_URL = 'https://api.enuguaustriaunion.com'; // Replace with actual API base URL
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchEvents();
+            fetchAnnouncements();
+        });
+
+        function fetchEvents() {
+            const eventsList = document.getElementById('events-list');
+            eventsList.innerHTML = '<div class="col-lg-12"><div class="loading-spinner"><i class="fas fa-spinner"></i> Loading events...</div></div>';
+
+            fetch(`${BASE_URL}/users/events`)
+                .then(response => response.json())
+                .then(data => {
+                    const upcomingEvents = data.filter(event => event.status === 'upcoming');
+                    eventsList.innerHTML = '';
+                    if (upcomingEvents.length === 0) {
+                        eventsList.innerHTML = '<div class="col-lg-12"><div class="error-message">No upcoming events available.</div></div>';
+                    } else {
+                        upcomingEvents.forEach(event => {
+                            eventsList.innerHTML += `
+                                <div class="col-lg-6 mb-4">
+                                    <div class="event-card">
+                                        ${event.isNew ? '<span class="new-badge">NEW</span>' : ''}
+                                        <div class="event-image">
+                                            <img src="${event.imageUrl || 'https://via.placeholder.com/600'}" alt="${event.title}">
+                                        </div>
+                                        <div class="event-content">
+                                            <span class="event-date">${new Date(event.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                                            <h3 class="event-title">${event.title}</h3>
+                                            <p class="event-description">${event.description}</p>
+                                            <div class="event-meta">
+                                                <div class="event-location">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                    <span>${event.location || 'TBA'}</span>
+                                                </div>
+                                                <div class="event-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    <span>${event.time || 'TBA'}</span>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-event mt-3">Register Now</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        showNotification('Events Loaded', 'Upcoming events have been updated.');
+                        document.querySelectorAll('.btn-event').forEach(button => {
+                            button.addEventListener('click', () => {
+                                showNotification('Registration', 'Thank you for your interest! Registration details will be sent to you shortly.');
+                            });
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching events:', error);
+                    eventsList.innerHTML = '<div class="col-lg-12"><div class="error-message">Failed to load events. Please try again later.</div></div>';
+                });
+        }
+
+        function fetchAnnouncements() {
+            const announcementsList = document.getElementById('announcements-list');
+            announcementsList.innerHTML = '<div class="col-lg-12"><div class="loading-spinner"><i class="fas fa-spinner"></i> Loading announcements...</div></div>';
+
+            fetch(`${BASE_URL}/users/announcement`)
+                .then(response => response.json())
+                .then(data => {
+                    const hasNew = data.some(ann => ann.isNew);
+                    document.getElementById('new-announcement-banner').style.display = hasNew ? 'block' : 'none';
+                    announcementsList.innerHTML = '';
+                    if (data.length === 0) {
+                        announcementsList.innerHTML = '<div class="col-lg-12"><div class="error-message">No announcements available.</div></div>';
+                    } else {
+                        data.forEach(ann => {
+                            announcementsList.innerHTML += `
+                                <div class="col-lg-6 mb-4">
+                                    <div class="announcement-card ${ann.isNew ? 'announcement-new' : ''}">
+                                        ${ann.isNew ? '<span class="new-indicator"></span>' : ''}
+                                        <span class="announcement-date">${new Date(ann.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                                        <h3 class="announcement-title">${ann.title}</h3>
+                                        <p class="announcement-content">${ann.content}</p>
+                                        ${ann.imageUrl ? `<div class="announcement-image"><img src="${ann.imageUrl}" alt="${ann.title}"></div>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        showNotification('Announcements Loaded', 'Latest announcements have been updated.');
+                        setTimeout(() => {
+                            document.querySelectorAll('.notification-dot').forEach(dot => dot.style.display = 'none');
+                        }, 5000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching announcements:', error);
+                    announcementsList.innerHTML = '<div class="col-lg-12"><div class="error-message">Failed to load announcements. Please try again later.</div></div>';
+                });
+        }
+
+        function showNotification(title, message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div class="notification-icon"><i class="fas fa-bell"></i></div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close"><i class="fas fa-times"></i></button>
+            `;
+            document.getElementById('notificationContainer').appendChild(notification);
+            setTimeout(() => notification.classList.add('show'), 100);
+            notification.querySelector('.notification-close').addEventListener('click', () => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            });
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 5000);
+            triggerUserWebsiteNotification();
+        }
+
+        function triggerUserWebsiteNotification() {
+            console.log('Triggering user website notification pop animation');
+            // Replace with actual implementation of your website's notification animation
+        }
+
+        document.getElementById('modeToggle').addEventListener('click', function() {
+            const body = document.body;
+            const icon = this.querySelector('i');
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        document.querySelector('.newsletter-btn').addEventListener('click', function() {
+            const email = document.querySelector('.newsletter-input').value;
+            if (email && isValidEmail(email)) {
+                showNotification('Subscribed', 'Thank you for subscribing to our newsletter!');
+                document.querySelector('.newsletter-input').value = '';
+            } else {
+                showNotification('Error', 'Please enter a valid email address.');
+            }
+        });
+
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(18, 18, 18, 0.95)';
+                navbar.style.padding = '10px 0';
+            } else {
+                navbar.style.background = 'rgba(18, 18, 18, 0.95)';
+                navbar.style.padding = '15px 0';
+            }
+        });
+
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
