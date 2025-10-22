@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Financial System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+     <link rel="stylesheet" href="../css/global.css">
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-line"></i> Admin Panel</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="./adminDash.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item"><a href="./users.html"><i class="fas fa-users"></i> Users</a></li>
+                    <li class="nav-item">
+                        <a href="management.html"><i class="fas fa-file-alt"></i> Management</a>
+                    </li>
+                    <li class="nav-item"><a href="./events.html"><i class="fas fa-calendar"></i> Events</a></li>
+                    <li class="nav-item"><a href="./announcements.html"><i class="fas fa-bullhorn"></i>
+                            Announcements</a></li>
+                    <li class="nav-item"><a href="./executives.html"><i class="fas fa-users"></i> Executives</a>
+                    </li>
+
+                    <li class="nav-item active">
+                        <a href="./settings.html"><i class="fas fa-cog"></i> Settings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../index.html" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <header class="content-header">
+                    <div class="header-left">
+                        <h1>System Settings</h1>
+                        <p>Configure your platform settings</p>
+                    </div>
+                </header>
+                
+                <div class="form-card">
+                    <h3><i class="fas fa-cog me-2"></i>General Settings</h3>
+                    
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="siteName">Site Name</label>
+                            <input type="text" class="form-control" id="siteName" value="Enugu State Union Austria">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="adminEmail">Admin Email</label>
+                            <input type="email" class="form-control" id="adminEmail" value="admin@example.com">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="currency">Default Currency</label>
+                            <select class="form-control" id="currency">
+                                <option value="USD" selected>US Dollar (USD)</option>
+                                <option value="EUR">Euro (EUR)</option>
+                                <option value="GBP">British Pound (GBP)</option>
+                                <option value="BTC">Bitcoin (BTC)</option>
+                                <option value="ETH">Ethereum (ETH)</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="timezone">Timezone</label>
+                            <select class="form-control" id="timezone">
+                                <option value="UTC-12">UTC-12:00</option>
+                                <option value="UTC-5" selected>UTC-05:00 (EST)</option>
+                                <option value="UTC">UTC</option>
+                                <option value="UTC+1">UTC+01:00</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary">Save Settings</button>
+                    </div>
+                </div>
+                
+                <!-- <div class="form-card">
+                    <h3><i class="fas fa-paint-brush me-2"></i>Theme & Appearance</h3>
+                    
+                    <div class="theme-options">
+                        <div class="theme-option active">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            <div class="theme-info">
+                                <h4>Default Theme</h4>
+                                <p>Purple gradient</p>
+                            </div>
+                        </div>
+                        
+                        <div class="theme-option">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                            <div class="theme-info">
+                                <h4>Blue Theme</h4>
+                                <p>Blue gradient</p>
+                            </div>
+                        </div>
+                        
+                        <div class="theme-option">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                            <div class="theme-info">
+                                <h4>Pink Theme</h4>
+                                <p>Pink gradient</p>
+                            </div>
+                        </div>
+                        
+                        <div class="theme-option">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #5ee7df 0%, #b490ca 100%);"></div>
+                            <div class="theme-info">
+                                <h4>Teal Theme</h4>
+                                <p>Teal gradient</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end mt-4">
+                        <button class="btn btn-primary">Apply Theme</button>
+                    </div>
+                </div> -->
+            </div>
+        </main>
+    </div>
+
+
+<script src="../js/global.js"></script>
+</body>
+</html>
