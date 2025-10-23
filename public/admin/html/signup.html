@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Signup | Secure Access</title>
+    <link rel="stylesheet" href="../css/main-css.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="illustration-section">
+            <div class="illustration-content">
+                <h1>Welcome to Admin Portal</h1>
+                <p>Manage your system with powerful tools and insights</p>
+                <div class="illustration">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMjU2IDhDMTE5IDggOCAxMTkgOCAyNTZzMTExIDI0OCAyNDggMjQ4IDI0OC0xMTEgMjQ4LTI0OFMzOTMgOCAyNTYgOHptMCA0NDhjLTExMC41IDAtMjAwLTg5LjUtMjAwLTIwMFMxNDUuNSA1NiAyNTYgNTZzMjAwIDg5LjUgMjAwIDIwMC04OS41IDIwMC0yMDAgMjAwem0xMjgtMTM2YzAgNTUuMi00NC44IDEwMC0xMDAgMTAwcy0xMDAtNDQuOC0xMDAtMTAwYzAtMTcuOCA0LjctMzQuNiAxMi44LTQ5LjJsNDMuMiA0My4yYzMuMSAzLjEgOC4yIDMuMSAxMS4zIDBsNDMtNDNjMy4xLTMuMSAzLjEtOC4yIDAtMTEuM2wtNDMuMi00My4yYzE0LjYtOC4xIDMxLjQtMTIuOCA0OS4yLTEyLjggNTUuMiAwIDEwMCA0NC44IDEwMCAxMDB6bS0xMDAgNTJjMjguNyAwIDUyLTIzLjMgNTItNTJzLTIzLjMtNTItNTItNTItNTIgMjMuMy01MiA1MiAyMy4zIDUyIDUyIDUyeiIvPjwvc3ZnPg==" alt="Security Illustration">
+                </div>
+            </div>
+        </div>
+        <div class="form-section">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>Create Admin Account</h2>
+                    <p>Please fill in your details to create an account</p>
+                </div>
+                
+                <form id="signupForm">
+                    <div class="input-group">
+                        <label for="name">Username</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="name" name="name" placeholder="Enter your full name">
+                        </div>
+                        <span class="error-message" id="nameError"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" placeholder="Enter your email address">
+                        </div>
+                        <span class="error-message" id="emailError"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Create a strong password">
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar"></div>
+                        </div>
+                        <span class="error-message" id="passwordError"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password">
+                            <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="confirmPasswordError"></span>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Create Account</span>
+                        <div class="btn-loader" id="btnLoader">
+                            <div class="loader"></div>
+                        </div>
+                    </button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Already have an account? <a href="../index.html">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 id="modalTitle">Success</h3>
+            <p id="modalMessage">Your account has been created successfully!</p>
+            <button class="modal-btn" id="modalButton">Continue</button>
+        </div>
+    </div>
+
+    <script src="../js/signup.js"></script>
+</body>
+</html>
