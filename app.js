@@ -68,6 +68,9 @@ app.use(
           "https://cdn.jsdelivr.net", // For source maps
           "https://images.unsplash.com" // For Unsplash API calls
         ],
+        scriptSrcAttr: [
+          "'self'", "'unsafe-inline'"
+        ],
         frameSrc: [
           "https://*.smartsupp.com",
           "https://*.smartsuppcdn.com",

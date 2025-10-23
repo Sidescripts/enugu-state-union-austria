@@ -12,31 +12,11 @@ function togglePassword(inputId) {
     }
 }
 
+
 // Form validation function
 function validateForm(formData) {
     const errors = [];
-    
-    if(!formData){
-        errors.push('All field(s) are required');
-    }
 
-    // Username validation
-    if (!formData.username.trim()) {
-        errors.push('Username is required');
-    } else if (formData.username.length < 3) {
-        errors.push('Username must be at least 3 characters long');
-    }
-    
-    // Full name validation
-    if (!formData.fullname.trim()) {
-        errors.push('Full name is required');
-    }
-    
-    // Country validation
-    if (!formData.country.trim()) {
-        errors.push('Country is required');
-    }
-    
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
@@ -52,27 +32,19 @@ function validateForm(formData) {
         errors.push('Password must be at least 6 characters long');
     }
     
-    // Confirm password validation
-    if (formData.password !== formData.confirmPassword) {
-        errors.push('Passwords do not match');
-    }
-    
     return errors;
 }
 const submitButton = document.getElementById('submitButton');
 
 // Function to handle form submission
-async function handleSignup(event) {
+async function handleLogin(event) {
     event.preventDefault();
     
     // Get form data
     const formData = {
-        username: document.getElementById('username-input').value,
-        fullname: document.getElementById('fullname-input').value,
-        country: document.getElementById('country-input').value,
-        email: document.getElementById('email-input').value,
-        password: document.getElementById('password-input').value,
-        confirmPassword: document.getElementById('confirm-password-input').value
+        
+        email: document.getElementById('login-email-input').value,
+        password: document.getElementById('login-password-input').value
     };
     
     
@@ -83,17 +55,16 @@ async function handleSignup(event) {
     const errors = validateForm(formData);
     
     if (errors.length > 0) {
-                // Always re-enable the button
-        submitButton.disabled = false;
-        submitButton.textContent = 'Sign Up';
         // Show error modal with all validation errors
-        Modal.error('Signup Error', errors.join(', '));
+        Modal.error('error', errors.join(', '));
+        submitButton.disabled = false;
+        submitButton.textContent = 'Login';
         return;
     }
-    
+
     try {
         
-        const response = await fetch('/api/v1/auth/signup', {
+        const response = await fetch('/api/v1/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -103,15 +74,18 @@ async function handleSignup(event) {
 
         const data = await response.json();
         // console.log(data)
-                // Always re-enable the button
         submitButton.disabled = false;
-        submitButton.textContent = 'Sign Up';
-        
+        submitButton.textContent = 'Login';
+
         if(response.ok){
+            localStorage.removeItem('token')
             localStorage.setItem('token', data.token);
             localStorage.setItem('email', data.user.email);
             localStorage.setItem('username', data.user.username);
-            Modal.success('success', 'Account created successfully! Redirecting to dashboard...');
+            submitButton.disabled = false;
+            submitButton.textContent = 'Login';
+            // console.log('Token received:', data.token);
+            Modal.success('success', 'Welcome back to gratoms-trade. Redirecting to dashboard...');
             setTimeout(() =>{
                 window.location.href = "../gratoms-dashboard/Dashboard.html"
             }, 2000)
@@ -126,28 +100,29 @@ async function handleSignup(event) {
             } else if (data.details && Array.isArray(data.details)) {
                 errorMessage = data.details.map(detail => detail.message).join(', ');
             }
-                // Always re-enable the button
-                submitButton.disabled = false;
-                submitButton.textContent = 'Sign Up';
+            submitButton.disabled = false;
+            submitButton.textContent = 'Login';
             Modal.error('error', errorMessage);
 
         }
         
     } catch (error) {
         console.error('Signup error:', error);
+        submitButton.disabled = false;
+        submitButton.textContent = 'Login';
         Modal.error('error', 'Network error. Please check your connection and try again.');
     } finally {
         // Always re-enable the button
         submitButton.disabled = false;
-        submitButton.textContent = 'Sign Up';
+        submitButton.textContent = 'Login';
     }
 }
 
 // Add event listener when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    const signupForm = document.getElementById('signup-form');
-    if (signupForm) {
-        signupForm.addEventListener('submit', handleSignup);
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
     }
     
     // Add input event listeners for real-time validation styling
