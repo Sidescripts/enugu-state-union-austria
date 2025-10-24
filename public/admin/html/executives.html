@@ -562,10 +562,17 @@
                             <label for="executive-position">Position</label>
                             <input type="text" class="form-control" id="executive-position" placeholder="Enter executive position">
                         </div>
+
                         <div class="form-group col-12">
                             <label for="executive-bio">Bio</label>
                             <textarea class="form-control" id="executive-bio" rows="4" placeholder="Enter executive bio"></textarea>
                         </div>
+
+                        <div class="form-group col-12">
+                                <label for="executive-order">Order</label>
+                                <input type="number" class="form-control w-100" id="executive-order" placeholder="e.g., 1, 2, 3..." value="0">
+                        </div>
+                        
                     </div>
                     <div class="d-flex justify-content-end gap-2">
                         <button class="btn" id="cancel-executive">Cancel</button>
@@ -958,5 +965,9 @@
             console.log('Triggering user website notification pop animation');
         }
     </script>
+
+
+    <script src="../js/mainAuth.js"></script>
+    <script src="../js/executiveFe.js"></script>
 </body>
 </html>
