@@ -38,8 +38,8 @@ module.exports = (sequelize) => {
           if (!Array.isArray(value)) {
             throw new Error('Images must be an array');
           }
-          if (value.length > 10) {
-            throw new Error('Cannot have more than 10 images');
+          if (value.length > 15) {
+            throw new Error('Cannot have more than 15 images');
           }
           value.forEach(url => {
             if (typeof url !== 'string' || !url.match(/^https?:\/\/.+/)) {

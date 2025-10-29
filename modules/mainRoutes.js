@@ -8,7 +8,12 @@ const announcementController = require("./admin/announController");
 const createEventValidation = require("../middlewares/validations/createEventsVal");
 const {createAnnouncementValidation, updateImageValidations, updateStatusValidations} = require("../middlewares/validations/createAnnouVal");
 const {createExecutiveValidation,updateImageValidation, updateStatusValidation} = require("../middlewares/validations/createExecVal");
-const {handleUploadError} = require("../middlewares/uploadMiddleware");
+const {
+    handleUploadError, 
+    uploadImage,
+    uploadMixedMedia
+
+} = require("../middlewares/uploadMiddleware");
 const router = express.Router();
 
 // AUTH
@@ -19,9 +24,9 @@ router.post("/forget-password", PasswordResetController().requestReset);
 router.post("/reset-password", PasswordResetController().resetPassword);
 
 // EVENTS
-router.post('/e/create-events',AuthMid, createEventValidation, handleUploadError,eventController.createEvent);
+router.post('/e/create-events',AuthMid, handleUploadError,uploadMixedMedia,createEventValidation, handleUploadError,eventController.createEvent);
 router.get('/e/all-events', AuthMid, eventController.getAllEvents);
-router.patch('/e/update/:id', AuthMid, eventController.updateEvent);
+router.patch('/e/update/:id', AuthMid, handleUploadError,uploadMixedMedia,eventController.updateEvent);
 router.patch('/e/update-status/:id', AuthMid, eventController.updateEventStatus);
 router.delete('/e/delete/:id', AuthMid, eventController.deleteEvent);
 router.get('/e/:id', AuthMid, eventController.getEventById);
@@ -31,10 +36,10 @@ router.patch('/e/:id/add-media', AuthMid, eventController.addMediaToEvent);
 router.patch('/e/:id/remove-media', AuthMid, eventController.removeMediaFromEvent);
 
 // EXEC
-router.post('/ex/create', AuthMid, createExecutiveValidation, handleUploadError, executiveController.createExecutive);
+router.post('/ex/create', AuthMid,   uploadImage, handleUploadError, executiveController.createExecutive);
 router.get('/ex/all', AuthMid, executiveController.getAllExecutives);
 router.get('/ex/:id', AuthMid, executiveController.getExecutiveById);
-router.patch('/ex/update/:id', AuthMid, executiveController.updateExecutive);
+router.patch('/ex/update/:id', AuthMid, uploadImage, handleUploadError,executiveController.updateExecutive);
 router.patch('/ex/update-image/:id', AuthMid, updateImageValidation, executiveController.updateExecutiveImage);
 router.patch('/ex/remove-image/:id', AuthMid, executiveController.removeExecutiveImage);
 router.patch('/ex/update-status/:id', AuthMid, updateStatusValidation, executiveController.updateExecutiveStatus);
