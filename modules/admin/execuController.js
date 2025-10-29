@@ -19,15 +19,22 @@ const executiveController = {
       }
 
       const { name, position, bio, image, order } = req.body;
-
+      let imageUrl = null;
+      // console.log(req.file)
+      // Use Cloudinary URL from multer if an image was uploaded
+      if (req.file) {
+        imageUrl = req.file.path; // Cloudinary URL from imageStorage
+      }
+      // console.log(req.body)
+      // console.log(imageUrl)
       const executive = await Executive.create({
         name,
         position,
         bio,
-        image,
+        image:imageUrl,
         order: order || 0
       });
-
+      console.log(executive)
       res.status(201).json({
         success: true,
         message: 'Executive created successfully',
@@ -60,20 +67,8 @@ const executiveController = {
   // GET /all - Get all executives with sorting and filtering
   getAllExecutives: async (req, res) => {
     try {
-      const { 
-        isActive = true,
-        sortBy = 'order',
-        sortOrder = 'ASC'
-      } = req.query;
-
-      const whereClause = {};
-      if (isActive !== undefined) whereClause.isActive = isActive === 'true';
-
-      const executives = await Executive.findAll({
-        where: whereClause,
-        order: [[sortBy, sortOrder.toUpperCase()]]
-      });
-
+      const executives = await Executive.findAll();
+      // console.log(executives)
       res.json({
         success: true,
         message: 'Executives retrieved successfully',
@@ -122,6 +117,8 @@ const executiveController = {
   // PATCH /update/:id - Update executive details
   updateExecutive: async (req, res) => {
     try {
+      // console.log(req.body)
+      // console.log("update route is working")
       const { id } = req.params;
       const { name, position, bio, order } = req.body;
 
@@ -324,7 +321,7 @@ const executiveController = {
           message: 'Executive not found'
         });
       }
-
+      console.log(executive.image)
       // Delete associated image from Cloudinary if exists
       if (executive.image) {
         await deleteImage(executive.image);
@@ -358,7 +355,7 @@ const executiveController = {
         order: [['order', 'ASC'], ['name', 'ASC']],
         attributes: ['id', 'name', 'position', 'bio', 'image', 'order']
       });
-
+      console.log(executives)
       res.json({
         success: true,
         message: 'Active executive board retrieved successfully',

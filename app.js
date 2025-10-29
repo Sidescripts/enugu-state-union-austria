@@ -14,7 +14,7 @@ const app = express();
 // init server
 let server;
 
-// config
+// config - Updated CSP with Cloudinary
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -27,6 +27,7 @@ app.use(
           "https://www.smartsuppchat.com",
           "https://*.smartsuppcdn.com",
           "https://code.jquery.com", // jQuery
+          "https://res.cloudinary.com", // Add Cloudinary for scripts
           "'unsafe-inline'"
         ],
         styleSrc: [
@@ -40,13 +41,18 @@ app.use(
         imgSrc: [
           "'self'",
           "data:",
+          "https:",
+          "blob:",
           "https://*.smartsupp.com",
           "https://*.smartsuppcdn.com",
           "https://app.ciqpay.com",
+          "https://via.placeholder.com",
           "https://cdn.pixabay.com",
-          "https://images.unsplash.com", // Unsplash images
-          "https://img.youtube.com", // YouTube thumbnails
-          "https://*.unsplash.com" // Wildcard for all Unsplash subdomains
+          "https://images.unsplash.com",
+          "https://img.youtube.com",
+          "https://*.unsplash.com",
+          "https://res.cloudinary.com", // Cloudinary images
+          "https://*.cloudinary.com"   // All Cloudinary subdomains
         ],
         fontSrc: [
           "'self'",
@@ -60,13 +66,19 @@ app.use(
         ],
         mediaSrc: [
           "'self'",
+          "https:",
+          "blob:",
           "https://*.smartsuppcdn.com",
-          "https://*.youtube.com" // For YouTube videos
+          "https://*.youtube.com",
+          "https://res.cloudinary.com", // Add Cloudinary for videos
+          "https://*.cloudinary.com"    // All Cloudinary subdomains
         ],
         connectSrc: [
           "'self'",
-          "https://cdn.jsdelivr.net", // For source maps
-          "https://images.unsplash.com" // For Unsplash API calls
+          "https://cdn.jsdelivr.net",
+          "https://images.unsplash.com",
+          "https://res.cloudinary.com", // Cloudinary API calls
+          "https://*.cloudinary.com"    // All Cloudinary subdomains
         ],
         scriptSrcAttr: [
           "'self'", "'unsafe-inline'"
@@ -74,11 +86,12 @@ app.use(
         frameSrc: [
           "https://*.smartsupp.com",
           "https://*.smartsuppcdn.com",
-          "https://www.youtube.com", // YouTube embeds
-          "https://*.youtube.com" // All YouTube subdomains
+          "https://www.youtube.com",
+          "https://*.youtube.com"
         ]
-      }
-    }
+      },
+    },
+    crossOriginEmbedderPolicy: false,
   })
 );
 
@@ -100,7 +113,14 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, './public')));
 app.use(morgan("combined"));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+// Apply bodyParser.json() selectively (avoid for multipart routes)
+app.use((req, res, next) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return next(); // Skip JSON parsing for multipart requests
+  }
+  bodyParser.json()(req, res, next);
+});
 
 // check out route
 app.get("/check-out", async(req,res) =>{

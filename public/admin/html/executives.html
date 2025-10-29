@@ -7,7 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        html { height: 100%; }
+        /* Existing CSS unchanged */
+                html { height: 100%; }
         body {
             font-family: "Poppins", sans-serif;
             background-color: #f5f7fa;
@@ -508,25 +509,14 @@
             <div class="sidebar-header"><h2><i class="fas fa-chart-line"></i> Admin Panel</h2></div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li class="nav-item">
-                        <a href="./adminDash.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                    </li>
+                    <li class="nav-item"><a href="./adminDash.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                     <li class="nav-item"><a href="./users.html"><i class="fas fa-users"></i> Users</a></li>
-                    <li class="nav-item">
-                        <a href="management.html"><i class="fas fa-file-alt"></i> Management</a>
-                    </li>
+                    <li class="nav-item"><a href="management.html"><i class="fas fa-file-alt"></i> Management</a></li>
                     <li class="nav-item"><a href="./events.html"><i class="fas fa-calendar"></i> Events</a></li>
-                    <li class="nav-item"><a href="./announcements.html"><i class="fas fa-bullhorn"></i>
-                            Announcements</a></li>
-                    <li class="nav-item active"><a href="./executives.html"><i class="fas fa-users"></i> Executives</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="./settings.html"><i class="fas fa-cog"></i> Settings</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="../index.html" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                    </li>
+                    <li class="nav-item"><a href="./announcements.html"><i class="fas fa-bullhorn"></i> Announcements</a></li>
+                    <li class="nav-item active"><a href="./executives.html"><i class="fas fa-users"></i> Executives</a></li>
+                    <li class="nav-item"><a href="./settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li class="nav-item"><a href="../index.html" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>
         </aside>
@@ -548,8 +538,8 @@
                     <h3><i class="fas fa-plus-circle me-2"></i>Add New Executive</h3>
                     <div class="file-upload-area" id="executive-photo-upload">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Drag & drop image here, or click to browse</p>
-                        <input type="file" id="executive-photo-file" style="display: none;" accept="image/*">
+                        <p>Drag & drop image here, or click to browse (required)</p>
+                        <input type="file" id="executive-photo-file" style="display: none;" accept="image/*" required>
                         <button class="btn btn-primary" onclick="document.getElementById('executive-photo-file').click()">Browse Image</button>
                     </div>
                     <div class="file-preview" id="executive-photo-preview"></div>
@@ -562,20 +552,17 @@
                             <label for="executive-position">Position</label>
                             <input type="text" class="form-control" id="executive-position" placeholder="Enter executive position">
                         </div>
-
+                        <div class="form-group col-md-6">
+                            <label for="executive-order">Order</label>
+                            <input type="number" class="form-control" id="executive-order" placeholder="e.g., 1, 2, 3..." value="0">
+                        </div>
                         <div class="form-group col-12">
                             <label for="executive-bio">Bio</label>
                             <textarea class="form-control" id="executive-bio" rows="4" placeholder="Enter executive bio"></textarea>
                         </div>
-
-                        <div class="form-group col-12">
-                                <label for="executive-order">Order</label>
-                                <input type="number" class="form-control w-100" id="executive-order" placeholder="e.g., 1, 2, 3..." value="0">
-                        </div>
-                        
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <button class="btn" id="cancel-executive">Cancel</button>
+                        <button class="btn btn-secondary" id="cancel-executive">Cancel</button>
                         <button class="btn btn-primary" id="save-executive">Save Executive</button>
                     </div>
                 </div>
@@ -587,15 +574,11 @@
     <div class="modal-overlay" id="editModal">
         <div class="modal">
             <div class="modal-header">
-                <h3 id="editModalTitle">Edit Item</h3>
+                <h3 id="editModalTitle">Edit Executive</h3>
                 <button class="modal-close" id="closeEditModal">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="editModalContent"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" id="cancelEdit">Cancel</button>
-                <button class="btn btn-primary" id="updateItem">Update</button>
             </div>
         </div>
     </div>
@@ -610,7 +593,7 @@
                 <p id="confirmationMessage">Are you sure you want to perform this action?</p>
             </div>
             <div class="modal-footer">
-                <button class="btn" id="cancelAction">Cancel</button>
+                <button class="btn btn-secondary" id="cancelAction">Cancel</button>
                 <button class="btn btn-primary" id="confirmAction">Confirm</button>
             </div>
         </div>
@@ -632,88 +615,63 @@
     </div>
 
     <script>
-        // Initialize localStorage with sample data if empty
-        if (!localStorage.getItem('executives')) {
-            const initialExecutives = [
-                {
-                    id: 1,
-                    name: "John Doe",
-                    position: "CEO",
-                    bio: "John has over 20 years of experience leading innovative companies in the tech industry.",
-                    imageUrl: "https://via.placeholder.com/120x120/667eea/ffffff?text=JD"
-                },
-                {
-                    id: 2,
-                    name: "Jane Smith",
-                    position: "CFO",
-                    bio: "Jane is a financial strategist with a proven track record in corporate finance.",
-                    imageUrl: "https://via.placeholder.com/120x120/764ba2/ffffff?text=JS"
-                }
-            ];
-            localStorage.setItem('executives', JSON.stringify(initialExecutives));
+        function showMessage(title, message) {
+            document.getElementById('messageTitle').textContent = title;
+            document.getElementById('messageText').textContent = message;
+            document.getElementById('messageModal').classList.add('active');
         }
 
-        let executives = JSON.parse(localStorage.getItem('executives')) || [];
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Toggle Add Form
-            document.getElementById('addExecutiveBtn').addEventListener('click', () => {
-                document.getElementById('add-executive-form').style.display = 'block';
-            });
-            document.getElementById('cancel-executive').addEventListener('click', () => {
-                document.getElementById('add-executive-form').style.display = 'none';
-                resetForm();
-            });
-
-            // File Upload
-            setupFileUpload('executive-photo-file', 'executive-photo-preview');
-            setupDragDrop('executive-photo-upload', 'executive-photo-file');
-
-            // Save Button
-            document.getElementById('save-executive').addEventListener('click', saveExecutive);
-
-            // Modal Buttons
-            document.getElementById('closeEditModal').addEventListener('click', () => {
-                document.getElementById('editModal').classList.remove('active');
-            });
-            document.getElementById('cancelEdit').addEventListener('click', () => {
-                document.getElementById('editModal').classList.remove('active');
-            });
-            document.getElementById('updateItem').addEventListener('click', updateItem);
-            document.getElementById('closeConfirmationModal').addEventListener('click', () => {
-                document.getElementById('confirmationModal').classList.remove('active');
-            });
-            document.getElementById('cancelAction').addEventListener('click', () => {
-                document.getElementById('confirmationModal').classList.remove('active');
-            });
-            document.getElementById('closeMessageModal').addEventListener('click', () => {
-                document.getElementById('messageModal').classList.remove('active');
-            });
-            document.getElementById('closeMessage').addEventListener('click', () => {
-                document.getElementById('messageModal').classList.remove('active');
-            });
-
-            // Mobile Sidebar
-            document.getElementById('menuToggle').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('active');
-                document.getElementById('sidebarOverlay').classList.toggle('active');
-            });
-            document.getElementById('sidebarOverlay').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.remove('active');
-                document.getElementById('sidebarOverlay').classList.remove('active');
-            });
-
-            // Render Executives
-            renderExecutives();
-        });
+        function showNotification(title, message) {
+            const notif = document.createElement('div');
+            notif.className = `notification notification-${title.toLowerCase()}`;
+            notif.innerHTML = `
+                <div class="notification-icon"><i class="fas fa-${title === 'Success' ? 'check' : 'exclamation-triangle'}"></i></div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close"><i class="fas fa-times"></i></button>
+            `;
+            const container = document.getElementById('notificationContainer');
+            if (container) {
+                container.appendChild(notif);
+                setTimeout(() => notif.classList.add('show'), 100);
+                notif.querySelector('.notification-close').onclick = () => {
+                    notif.classList.remove('show');
+                    setTimeout(() => notif.remove(), 300);
+                };
+                setTimeout(() => {
+                    if (notif.parentNode) {
+                        notif.classList.remove('show');
+                        setTimeout(() => notif.remove(), 300);
+                    }
+                }, 5000);
+            }
+        }
 
         function setupFileUpload(inputId, previewId) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
+            if (!input || !preview) {
+                console.warn(`File upload elements not found: ${inputId}, ${previewId}`);
+                return;
+            }
             input.addEventListener('change', function() {
+                console.log('File input changed:', this.files);
                 preview.innerHTML = '';
                 if (this.files.length) {
                     const file = this.files[0];
+                    console.log('Selected file:', file);
+                    if (!file.type.startsWith('image/')) {
+                        showMessage('Error', 'Only image files are allowed.');
+                        input.value = '';
+                        return;
+                    }
+                    if (file.size > 5 * 1024 * 1024) {
+                        showMessage('Error', 'Image size exceeds 5MB limit.');
+                        input.value = '';
+                        return;
+                    }
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         const previewItem = document.createElement('div');
@@ -723,14 +681,18 @@
                         const removeBtn = document.createElement('button');
                         removeBtn.className = 'remove-file';
                         removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                        removeBtn.addEventListener('click', () => previewItem.remove());
+                        removeBtn.addEventListener('click', () => {
+                            console.log('Removing file preview');
+                            previewItem.remove();
+                            input.value = '';
+                        });
                         previewItem.appendChild(img);
                         previewItem.appendChild(removeBtn);
                         preview.appendChild(previewItem);
                     };
-                    if (file.type.startsWith('image/')) {
-                        reader.readAsDataURL(file);
-                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    console.log('No file selected in change event');
                 }
             });
         }
@@ -738,6 +700,10 @@
         function setupDragDrop(uploadAreaId, inputId) {
             const uploadArea = document.getElementById(uploadAreaId);
             const fileInput = document.getElementById(inputId);
+            if (!uploadArea || !fileInput) {
+                console.warn(`Drag drop elements not found: ${uploadAreaId}, ${inputId}`);
+                return;
+            }
             uploadArea.addEventListener('dragover', e => {
                 e.preventDefault();
                 uploadArea.style.borderColor = '#667eea';
@@ -752,221 +718,27 @@
                 e.preventDefault();
                 uploadArea.style.borderColor = '#eaeaea';
                 uploadArea.style.backgroundColor = 'transparent';
+                console.log('Dropped files:', e.dataTransfer.files);
                 if (e.dataTransfer.files.length) {
+                    const file = e.dataTransfer.files[0];
+                    if (!file.type.startsWith('image/')) {
+                        showMessage('Error', 'Only image files are allowed.');
+                        return;
+                    }
+                    if (file.size > 5 * 1024 * 1024) {
+                        showMessage('Error', 'Image size exceeds 5MB limit.');
+                        return;
+                    }
                     fileInput.files = e.dataTransfer.files;
+                    console.log('File input updated:', fileInput.files);
                     const event = new Event('change', { bubbles: true });
                     fileInput.dispatchEvent(event);
+                } else {
+                    console.log('No files dropped');
                 }
             });
-        }
-
-        function renderExecutives() {
-            const list = document.getElementById('executives-list');
-            list.innerHTML = executives.length ? '' : '<div class="empty-state"><i class="fas fa-users"></i><p>No executives available.</p></div>';
-            executives.forEach(executive => {
-                list.innerHTML += `
-                    <div class="profile-card" data-id="${executive.id}">
-                        <img src="${executive.imageUrl}" alt="${executive.name}" class="profile-image">
-                        <div class="content-body">
-                            <h3 class="content-title">${executive.name}</h3>
-                            <p class="content-description">${executive.position}</p>
-                            <p class="content-description">${executive.bio}</p>
-                            <div class="content-actions">
-                                <button class="btn btn-sm btn-primary edit-btn" data-id="${executive.id}" data-type="executive">Edit</button>
-                                <button class="btn btn-sm btn-danger delete-btn" data-id="${executive.id}" data-type="executive">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            attachEventListeners();
-        }
-
-        function attachEventListeners() {
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => showEditModal(btn.dataset.id, btn.dataset.type));
-            });
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', () => deleteItem(btn.dataset.id, btn.dataset.type));
-            });
-        }
-
-        function saveExecutive() {
-            const name = document.getElementById('executive-name').value;
-            const position = document.getElementById('executive-position').value;
-            const bio = document.getElementById('executive-bio').value;
-            if (!name || !position) {
-                showMessage('Error', 'Name and position are required.');
-                return;
-            }
-            const id = Date.now();
-            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase();
-            const imageUrl = `https://via.placeholder.com/120x120/667eea/ffffff?text=${encodeURIComponent(initials)}`;
-            executives.push({ id, name, position, bio, imageUrl });
-            localStorage.setItem('executives', JSON.stringify(executives));
-            renderExecutives();
-            document.getElementById('add-executive-form').style.display = 'none';
-            resetForm();
-            showMessage('Success', 'Executive saved successfully!');
-        }
-
-        function resetForm() {
-            document.getElementById('executive-name').value = '';
-            document.getElementById('executive-position').value = '';
-            document.getElementById('executive-bio').value = '';
-            document.getElementById('executive-photo-preview').innerHTML = '';
-            document.getElementById('executive-photo-file').value = '';
-        }
-
-        function showEditModal(id, type) {
-            const modal = document.getElementById('editModal');
-            const modalTitle = document.getElementById('editModalTitle');
-            const modalContent = document.getElementById('editModalContent');
-            const item = executives.find(e => e.id == id);
-            modalTitle.textContent = 'Edit Executive';
-            const editForm = `
-                <div class="file-upload-area" id="edit-executive-photo-upload">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Drag & drop image here, or click to browse</p>
-                    <input type="file" id="edit-executive-photo-file" style="display: none;" accept="image/*">
-                    <button class="btn btn-primary" onclick="document.getElementById('edit-executive-photo-file').click()">Browse Image</button>
-                </div>
-                <div class="file-preview" id="edit-executive-photo-preview">
-                    <div class="file-preview-item">
-                        <img src="${item.imageUrl}">
-                        <button class="remove-file"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="form-group col-md-6">
-                        <label for="edit-executive-name">Name</label>
-                        <input type="text" class="form-control" id="edit-executive-name" value="${item.name}">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="edit-executive-position">Position</label>
-                        <input type="text" class="form-control" id="edit-executive-position" value="${item.position}">
-                    </div>
-                    <div class="form-group col-12">
-                        <label for="edit-executive-bio">Bio</label>
-                        <textarea class="form-control" id="edit-executive-bio" rows="4">${item.bio}</textarea>
-                    </div>
-                </div>
-            `;
-            modalContent.innerHTML = editForm;
-            modalContent.setAttribute('data-edit-id', id);
-            modalContent.setAttribute('data-edit-type', type);
-
-            setupFileUpload('edit-executive-photo-file', 'edit-executive-photo-preview');
-            setupDragDrop('edit-executive-photo-upload', 'edit-executive-photo-file');
-
-            modal.classList.add('active');
-        }
-
-        function updateItem() {
-            const modalContent = document.getElementById('editModalContent');
-            const id = modalContent.getAttribute('data-edit-id');
-            const type = modalContent.getAttribute('data-edit-type');
-            if (type === 'executive') {
-                const name = document.getElementById('edit-executive-name').value;
-                const position = document.getElementById('edit-executive-position').value;
-                const bio = document.getElementById('edit-executive-bio').value;
-                if (!name || !position) {
-                    showMessage('Error', 'Name and position are required.');
-                    return;
-                }
-                const initials = name.split(' ').map(w => w[0]).join('').toUpperCase();
-                const imageUrl = `https://via.placeholder.com/120x120/667eea/ffffff?text=${encodeURIComponent(initials)}`;
-                executives = executives.map(e => e.id == id ? { id, name, position, bio, imageUrl } : e);
-                localStorage.setItem('executives', JSON.stringify(executives));
-                renderExecutives();
-            }
-            document.getElementById('editModal').classList.remove('active');
-            showMessage('Success', 'Executive updated successfully!');
-        }
-
-        function deleteItem(id, type) {
-            const modal = document.getElementById('confirmationModal');
-            const confirmBtn = document.getElementById('confirmAction');
-            const cancelBtn = document.getElementById('cancelAction');
-            const closeBtn = document.getElementById('closeConfirmationModal');
-            document.getElementById('confirmationTitle').textContent = 'Confirm Deletion';
-            document.getElementById('confirmationMessage').textContent = `Are you sure you want to delete this executive? This action cannot be undone.`;
-            modal.classList.add('active');
-
-            const confirmHandler = function() {
-                if (type === 'executive') {
-                    executives = executives.filter(e => e.id != id);
-                    localStorage.setItem('executives', JSON.stringify(executives));
-                    renderExecutives();
-                }
-                modal.classList.remove('active');
-                showMessage('Success', 'Executive deleted successfully!');
-                confirmBtn.removeEventListener('click', confirmHandler);
-                cancelBtn.removeEventListener('click', cancelHandler);
-                closeBtn.removeEventListener('click', closeHandler);
-            };
-
-            const cancelHandler = function() {
-                modal.classList.remove('active');
-                confirmBtn.removeEventListener('click', confirmHandler);
-                cancelBtn.removeEventListener('click', cancelHandler);
-                closeBtn.removeEventListener('click', closeHandler);
-            };
-
-            const closeHandler = function() {
-                modal.classList.remove('active');
-                confirmBtn.removeEventListener('click', confirmHandler);
-                cancelBtn.removeEventListener('click', cancelHandler);
-                closeBtn.removeEventListener('click', closeHandler);
-            };
-
-            confirmBtn.addEventListener('click', confirmHandler);
-            cancelBtn.addEventListener('click', cancelHandler);
-            closeBtn.addEventListener('click', closeHandler);
-        }
-
-        function showMessage(title, message) {
-            document.getElementById('messageTitle').textContent = title;
-            document.getElementById('messageText').textContent = message;
-            document.getElementById('messageModal').classList.add('active');
-        }
-
-        function showNotification() {
-            const notification = document.createElement('div');
-            notification.className = 'notification notification-info';
-            notification.innerHTML = `
-                <div class="notification-icon"><i class="fas fa-bell"></i></div>
-                <div class="notification-content">
-                    <div class="notification-title">New Executive</div>
-                    <div class="notification-message">A new executive profile has been added. Check it out!</div>
-                </div>
-                <button class="notification-close"><i class="fas fa-times"></i></button>
-            `;
-            document.getElementById('notificationContainer').appendChild(notification);
-            setTimeout(() => notification.classList.add('show'), 100);
-            notification.querySelector('.notification-close').addEventListener('click', () => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            });
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.classList.remove('show');
-                    setTimeout(() => notification.remove(), 300);
-                }
-            }, 5000);
-            // Placeholder for user website notification pop animation
-            // TODO: Trigger user website notification pop animation when code is shared
-            // Example: triggerUserWebsiteNotification();
-        }
-
-        // Placeholder function for user website notification
-        function triggerUserWebsiteNotification() {
-            // Replace with actual implementation once user website code is shared
-            console.log('Triggering user website notification pop animation');
         }
     </script>
-
-
     <script src="../js/mainAuth.js"></script>
     <script src="../js/executiveFe.js"></script>
 </body>

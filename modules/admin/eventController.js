@@ -18,22 +18,85 @@ const eventController = {
         });
       }
 
-      const { title, description, date, images = [], videos = [], featuredImage } = req.body;
+      const { title, description, date, featuredImage } = req.body;
+
+
+      console.log('Request files:', req.files);
+      console.log('Request body:', req.body);
+
+      const imageUrls = [];
+      const videoUrls = [];
+
+       // FIX: Handle different file structures
+    if (req.files) {
+      // Case 1: req.files is an array
+      if (Array.isArray(req.files)) {
+        req.files.forEach(file => {
+          if (file.mimetype.startsWith('image/')) {
+            imageUrls.push(file.secure_url || file.path || file.location);
+          } else if (file.mimetype.startsWith('video/')) {
+            videoUrls.push(file.secure_url || file.path || file.location);
+          }
+        });
+      }
+      // Case 2: req.files is an object with arrays (like from multer)
+      else if (req.files.images || req.files.videos) {
+        // Handle images
+        if (req.files.images) {
+          const images = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+          images.forEach(file => {
+            if (file.mimetype.startsWith('image/')) {
+              imageUrls.push(file.secure_url || file.path || file.location);
+            }
+          });
+        }
+        
+        // Handle videos
+        if (req.files.videos) {
+          const videos = Array.isArray(req.files.videos) ? req.files.videos : [req.files.videos];
+          videos.forEach(file => {
+            if (file.mimetype.startsWith('video/')) {
+              videoUrls.push(file.secure_url || file.path || file.location);
+            }
+          });
+        }
+      }
+      // Case 3: req.files is a single file object
+      else if (req.files.mimetype) {
+        if (req.files.mimetype.startsWith('image/')) {
+          imageUrls.push(req.files.secure_url || req.files.path || req.files.location);
+        } else if (req.files.mimetype.startsWith('video/')) {
+          videoUrls.push(req.files.secure_url || req.files.path || req.files.location);
+        }
+      }
+    }
+
+    console.log('Processed image URLs:', imageUrls);
+    console.log('Processed video URLs:', videoUrls);
+
+
 
       // Auto-determine status based on date
       const eventDate = new Date(date);
       const currentDate = new Date();
-      const status = eventDate < currentDate ? 'past' : 'recent';
+      const status = eventDate < currentDate ? 'recent' : 'past';
 
       const event = await Event.create({
         title,
         description,
         date: eventDate,
-        images,
-        videos,
+        images: imageUrls, // Save the array of image URLs
+        videos: videoUrls, // Save the array of video URLs
+        featuredImage: imageUrls[0] || null, // Set first image as featured
         featuredImage,
-        status
+        status: status || 'recent'
       });
+
+      console.log('Event created with media:', {
+          images: imageUrls.length,
+          videos: videoUrls.length
+      });
+
 
       res.status(201).json({
         success: true,
@@ -54,42 +117,14 @@ const eventController = {
   // GET /all-events - Get all events with filtering and pagination
   getAllEvents: async (req, res) => {
     try {
-      const { 
-        page = 1, 
-        limit = 10, 
-        status, 
-        isActive = true,
-        sortBy = 'date',
-        sortOrder = 'DESC'
-      } = req.query;
-
-      const offset = (page - 1) * limit;
       
-      // Build where clause
-      const whereClause = {};
-      if (status) whereClause.status = status;
-      if (isActive !== undefined) whereClause.isActive = isActive === 'true';
-
-      const events = await Event.findAndCountAll({
-        where: whereClause,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order: [[sortBy, sortOrder.toUpperCase()]]
-      });
+      const event = await Event.findAll({})
+      console.log(event)
 
       res.json({
         success: true,
         message: 'Events retrieved successfully',
-        data: {
-          events: events.rows,
-          pagination: {
-            currentPage: parseInt(page),
-            totalPages: Math.ceil(events.count / limit),
-            totalEvents: events.count,
-            hasNext: offset + events.rows.length < events.count,
-            hasPrev: page > 1
-          }
-        }
+        event
       });
 
     } catch (error) {
@@ -101,62 +136,90 @@ const eventController = {
       });
     }
   },
+updateEvent: async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, date, status } = req.body;
 
-  // PATCH /update/:id - Update event details
-  updateEvent: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { title, description, date, images, videos} = req.body;
+    console.log('Update request - Body:', req.body);
+    console.log('Update request - Files:', req.files);
 
-      const event = await Event.findByPk(id);
-      if (!event) {
-        return res.status(404).json({
-          success: false,
-          message: 'Event not found'
-        });
-      }
-
-      // Prepare update data
-      const updateData = {};
-      if (title !== undefined) updateData.title = title;
-      if (description !== undefined) updateData.description = description;
-      
-      // Handle date update and auto-update status
-      if (date !== undefined) {
-        const eventDate = new Date(date);
-        const currentDate = new Date();
-        updateData.date = eventDate;
-        updateData.status = eventDate < currentDate ? 'past' : 'recent';
-      }
-
-      // Handle images update
-      if (images !== undefined) {
-        updateData.images = images;
-      }
-
-      // Handle videos update
-      if (videos !== undefined) {
-        updateData.videos = videos;
-      }
-
-      await event.update(updateData);
-
-      res.json({
-        success: true,
-        message: 'Event updated successfully',
-        data: event
-      });
-
-    } catch (error) {
-      console.error('Update event error:', error);
-      res.status(500).json({
+    const event = await Event.findByPk(id);
+    if (!event) {
+      return res.status(404).json({
         success: false,
-        message: 'Error updating event',
-        error: error.message
+        message: 'Event not found'
       });
     }
-  },
 
+    // Prepare update data
+    const updateData = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    
+    // Handle date update and auto-update status
+    if (date !== undefined) {
+      const eventDate = new Date(date);
+      const currentDate = new Date();
+      updateData.date = eventDate;
+      
+      // FIXED: Correct status logic
+      // If date is in the future → 'recent', if in the past → 'past'
+      updateData.status = eventDate >= currentDate ? 'recent' : 'past';
+    }
+
+    // Handle manual status override
+    if (status !== undefined && status !== '') {
+      updateData.status = status;
+    }
+
+    // Handle images - merge existing with new
+    let finalImages = [...(event.images || [])];
+    if (req.files && req.files.images) {
+      const newImages = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+      newImages.forEach(file => {
+        const url = file.secure_url || file.path || file.location;
+        if (url) finalImages.push(url);
+      });
+    }
+    updateData.images = finalImages;
+
+    // Handle videos - merge existing with new
+    let finalVideos = [...(event.videos || [])];
+    if (req.files && req.files.videos) {
+      const newVideos = Array.isArray(req.files.videos) ? req.files.videos : [req.files.videos];
+      newVideos.forEach(file => {
+        const url = file.secure_url || file.path || file.location;
+        if (url) finalVideos.push(url);
+      });
+    }
+    updateData.videos = finalVideos;
+
+    // Set featured image to first image if available
+    updateData.featuredImage = finalImages.length > 0 ? finalImages[0] : null;
+
+    console.log('Final update data:', updateData);
+
+    await event.update(updateData);
+
+    // Fetch the updated event
+    const updatedEvent = await Event.findByPk(id);
+
+    res.json({
+      success: true,
+      message: 'Event updated successfully',
+      data: updatedEvent
+    });
+
+  } catch (error) {
+    console.error('Update event error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating event',
+      error: error.message
+    });
+  }
+},
   // PATCH /update-status/:id - Update event status and active state
   updateEventStatus: async (req, res) => {
     try {
