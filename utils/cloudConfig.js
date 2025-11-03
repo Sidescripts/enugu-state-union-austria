@@ -1,3 +1,4 @@
+
 // utils/mediaHelpers.js
 const { cloudinary } = require('./cloudinaryConfig');
 

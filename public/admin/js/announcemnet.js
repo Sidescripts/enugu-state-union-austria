@@ -1,5 +1,4 @@
 // js/announcements.js
-
 const API_BASE = '/api/v1';
 let announcements = [];
 
@@ -30,15 +29,12 @@ async function initializeApp() {
 }
 
 function hideAllModals() {
-  // Hide add announcement form
   const addForm = document.getElementById('add-announcement-form');
   if (addForm) addForm.style.display = 'none';
   
-  // Hide edit modal
   const editModal = document.getElementById('editModal');
   if (editModal) editModal.style.display = 'none';
   
-  // Hide delete modal
   const deleteModal = document.getElementById('deleteModal');
   if (deleteModal) deleteModal.style.display = 'none';
 }
@@ -48,7 +44,6 @@ function setupEventListeners() {
   const addBtn = document.getElementById('addAnnouncementBtn');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      console.log('Add announcement button clicked');
       document.getElementById('add-announcement-form').style.display = 'block';
     });
   }
@@ -62,7 +57,7 @@ function setupEventListeners() {
     });
   }
 
-  // Browse images button
+  // Browse images button (Add)
   const browseBtn = document.getElementById('browse-images-btn');
   if (browseBtn) {
     browseBtn.addEventListener('click', () => {
@@ -70,7 +65,7 @@ function setupEventListeners() {
     });
   }
 
-  // Edit modal browse images button
+  // Browse images button (Edit)
   const editBrowseBtn = document.getElementById('edit-browse-images-btn');
   if (editBrowseBtn) {
     editBrowseBtn.addEventListener('click', () => {
@@ -99,8 +94,13 @@ function setupEventListeners() {
 
   // File uploads
   setupFileUpload('announcement-images-files', 'announcement-images-preview');
-  setupFileUpload('edit-announcement-images-files', 'edit-announcement-images-preview');
   setupDragDrop('announcement-images-upload', 'announcement-images-files');
+
+  // Edit modal file upload
+  const editFileInput = document.getElementById('edit-announcement-images-files');
+  if (editFileInput) {
+    editFileInput.addEventListener('change', handleEditImageChange);
+  }
   setupDragDrop('edit-announcement-images-upload', 'edit-announcement-images-files');
 
   // Modal controls
@@ -137,6 +137,12 @@ async function fetchAnnouncements() {
       }
     });
 
+    if(response.status === 401){
+      setTimeout(() =>{
+        window.location.href = '../index.html'
+      },2500)
+    }
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -164,15 +170,11 @@ async function handleCreateAnnouncement(event) {
   event.preventDefault();
   console.log('Creating announcement...');
   
-  // Get form values
   const title = document.getElementById('announcement-title').value.trim();
   const content = document.getElementById('announcement-content').value.trim();
   const expiresAt = document.getElementById('announcement-expiresAt').value;
   const isImportant = document.getElementById('announcement-isImportant').checked;
   
-  console.log('Form values:', { title, content, expiresAt, isImportant });
-  
-  // Validate required fields
   if (!title || !content) {
     showNotification('error', 'Validation Error', 'Title and content are required fields');
     return;
@@ -183,40 +185,24 @@ async function handleCreateAnnouncement(event) {
     clearFormErrors();
 
     const token = getAuthToken();
-    if (!token) {
-      throw new Error('Authentication required');
+    if (!token) throw new Error('Authentication required');
+
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    console.log('FormData entries:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
     }
 
-    // Create FormData manually to ensure proper data types
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('content', content);
-    formData.append('isImportant', isImportant.toString());
-    
-    if (expiresAt) {
-      formData.append('expiresAt', expiresAt);
-    }
-    
-    // Add files
-    const imageFilesInput = document.getElementById('announcement-images-files');
-    if (imageFilesInput && imageFilesInput.files) {
-      for (let i = 0; i < imageFilesInput.files.length; i++) {
-        formData.append('images', imageFilesInput.files[i]);
-      }
-      console.log('Added', imageFilesInput.files.length, 'images to form data');
-    }
-
-    console.log('Sending request to server...');
     const response = await fetch(`${API_BASE}/a/create`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Authorization': `Bearer ${token}` },
       body: formData
     });
 
     const result = await response.json();
-    console.log('Create announcement response:', result);
+    console.log('Create response:', result);
 
     if (!response.ok) {
       if (result.errors) {
@@ -258,33 +244,30 @@ async function handleUpdateAnnouncement(event) {
     clearEditFormErrors();
 
     const token = getAuthToken();
-    if (!token) {
-      throw new Error('Authentication required');
-    }
+    if (!token) throw new Error('Authentication required');
 
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
-    formData.append('isImportant', isImportant.toString());
-    
-    if (expiresAt) {
-      formData.append('expiresAt', expiresAt);
-    }
+    formData.append('isImportant', isImportant);
+    if (expiresAt) formData.append('expiresAt', expiresAt);
 
-    // Add new files
-    const newImageFilesInput = document.getElementById('edit-announcement-images-files');
-    if (newImageFilesInput && newImageFilesInput.files) {
-      for (let i = 0; i < newImageFilesInput.files.length; i++) {
-        formData.append('newImages', newImageFilesInput.files[i]);
-      }
-      console.log('Added', newImageFilesInput.files.length, 'new images to form data');
+    // === IMAGES: Send existing URLs + new files ===
+    const keptUrls = window.currentEditImages
+      .filter(img => img.url && !img.file)
+      .map(img => img.url);
+    const newFiles = window.currentEditImages
+      .filter(img => img.file)
+      .map(img => img.file);
+
+    if (keptUrls.length > 0) {
+      formData.append('existingImages', JSON.stringify(keptUrls));
     }
+    newFiles.forEach(file => formData.append('images', file));
 
     const response = await fetch(`${API_BASE}/a/update/${announcementId}`, {
       method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Authorization': `Bearer ${token}` },
       body: formData
     });
 
@@ -322,9 +305,7 @@ async function handleDeleteAnnouncement() {
     showDeleteLoading(true);
 
     const token = getAuthToken();
-    if (!token) {
-      throw new Error('Authentication required');
-    }
+    if (!token) throw new Error('Authentication required');
 
     const response = await fetch(`${API_BASE}/a/delete/${announcementId}`, {
       method: 'DELETE',
@@ -336,10 +317,7 @@ async function handleDeleteAnnouncement() {
 
     const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.message || 'Failed to delete announcement');
-    }
-
+    if (!response.ok) throw new Error(result.message || 'Failed to delete announcement');
     if (result.success) {
       showNotification('success', 'Success', 'Announcement deleted successfully!');
       closeDeleteModal();
@@ -358,9 +336,7 @@ async function handleDeleteAnnouncement() {
 async function toggleAnnouncementImportance(announcementId) {
   try {
     const token = getAuthToken();
-    if (!token) {
-      throw new Error('Authentication required');
-    }
+    if (!token) throw new Error('Authentication required');
 
     const response = await fetch(`${API_BASE}/a/toggle-importance/${announcementId}`, {
       method: 'PATCH',
@@ -372,10 +348,7 @@ async function toggleAnnouncementImportance(announcementId) {
 
     const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.message || 'Failed to toggle importance');
-    }
-
+    if (!response.ok) throw new Error(result.message || 'Failed to toggle importance');
     if (result.success) {
       showNotification('success', 'Success', 'Announcement importance updated!');
       await fetchAnnouncements();
@@ -393,7 +366,7 @@ function renderAnnouncements() {
   const list = document.getElementById('announcements-list');
   const emptyState = document.getElementById('empty-state');
   
-  if (!announcements || !Array.isArray(announcements) || announcements.length === 0) {
+  if (!announcements || announcements.length === 0) {
     if (list) list.innerHTML = '';
     if (emptyState) emptyState.style.display = 'block';
     return;
@@ -466,54 +439,16 @@ function showEditModal(announcementId) {
     document.getElementById('edit-announcement-expiresAt').value = '';
   }
 
-  // Display current images
-  displayCurrentImages(announcement.images);
-  
-  // Clear any new file selections
-  document.getElementById('edit-announcement-images-preview').innerHTML = '';
-  document.getElementById('edit-announcement-images-files').value = '';
+  // === LOAD IMAGES INTO EDIT MODAL ===
+  const preview = document.getElementById('edit-announcement-images-preview');
+  const fileInput = document.getElementById('edit-announcement-images-files');
+  preview.innerHTML = '';
+  fileInput.value = '';
 
-  // Show modal with proper overlay
+  window.currentEditImages = (announcement.images || []).map(url => ({ url }));
+  displayEditImagePreviews();
+
   document.getElementById('editModal').style.display = 'flex';
-}
-
-function displayCurrentImages(images) {
-  const container = document.getElementById('edit-current-images');
-  container.innerHTML = '';
-
-  if (!images || images.length === 0) {
-    container.innerHTML = '<div class="no-images-message">No images currently</div>';
-    return;
-  }
-
-  images.forEach((imageUrl, index) => {
-    const imageItem = document.createElement('div');
-    imageItem.className = 'current-image-item';
-    imageItem.innerHTML = `
-      <img src="${imageUrl}" alt="Current image ${index + 1}">
-      <div class="image-actions">
-        <button type="button" class="btn-remove-image" data-image-url="${imageUrl}">
-          <i class="fas fa-trash"></i> Remove
-        </button>
-      </div>
-    `;
-    container.appendChild(imageItem);
-  });
-
-  // Add event listeners for remove buttons
-  container.querySelectorAll('.btn-remove-image').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const imageUrl = this.getAttribute('data-image-url');
-      removeCurrentImage(imageUrl);
-    });
-  });
-}
-
-function removeCurrentImage(imageUrl) {
-  // This would typically call an API endpoint to remove the image
-  // For now, we'll just show a notification
-  showNotification('info', 'Image Removal', `Image removal would be handled by API. URL: ${imageUrl}`);
-  console.log('Would remove image:', imageUrl);
 }
 
 function showDeleteModal(announcementId) {
@@ -524,98 +459,139 @@ function showDeleteModal(announcementId) {
 function closeEditModal() {
   document.getElementById('editModal').style.display = 'none';
   clearEditFormErrors();
+  window.currentEditImages = [];
 }
 
 function closeDeleteModal() {
   document.getElementById('deleteModal').style.display = 'none';
 }
 
-// File Upload & Drag-Drop
+// === EDIT IMAGE PREVIEWS ===
+function displayEditImagePreviews() {
+  const preview = document.getElementById('edit-announcement-images-preview');
+  preview.innerHTML = '';
+
+  window.currentEditImages.forEach((img, index) => {
+    const item = document.createElement('div');
+    item.className = 'file-preview-item';
+
+    if (img.file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const imgEl = document.createElement('img');
+        imgEl.src = e.target.result;
+        imgEl.alt = `Preview ${index + 1}`;
+        item.appendChild(imgEl);
+        appendRemoveButton(item, index);
+        preview.appendChild(item);
+      };
+      reader.readAsDataURL(img.file);
+    } else {
+      const imgEl = document.createElement('img');
+      imgEl.src = img.url;
+      imgEl.alt = `Image ${index + 1}`;
+      item.appendChild(imgEl);
+      appendRemoveButton(item, index);
+      preview.appendChild(item);
+    }
+  });
+
+  if (window.currentEditImages.length > 0) {
+    const count = document.createElement('div');
+    count.className = 'file-count';
+    count.textContent = `${window.currentEditImages.length}/2 images`;
+    count.style.marginTop = '10px';
+    count.style.fontSize = '14px';
+    count.style.color = '#666';
+    preview.appendChild(count);
+  }
+}
+
+function appendRemoveButton(item, index) {
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'remove-file';
+  remove.innerHTML = '<i class="fas fa-times"></i>';
+  remove.onclick = () => {
+    window.currentEditImages.splice(index, 1);
+    displayEditImagePreviews();
+  };
+  item.appendChild(remove);
+}
+
+function handleEditImageChange(e) {
+  const newFiles = Array.from(e.target.files);
+  const currentUrls = window.currentEditImages.filter(img => !img.file).length;
+  const remaining = 2 - currentUrls;
+
+  const filesToAdd = newFiles.slice(0, remaining);
+  filesToAdd.forEach(file => window.currentEditImages.push({ file }));
+
+  if (newFiles.length > remaining) {
+    showNotification('warning', 'Limit', `Only ${remaining} more image(s) allowed.`);
+  }
+
+  displayEditImagePreviews();
+  e.target.value = '';
+}
+
+// SIMPLIFIED File Upload & Drag-Drop
 function setupFileUpload(inputId, previewId) {
   const input = document.getElementById(inputId);
   const preview = document.getElementById(previewId);
-  
   if (!input || !preview) return;
-  
+
   let currentFiles = [];
-  
+
   input.addEventListener('change', (e) => {
     const newFiles = Array.from(e.target.files);
-    
-    // Reset current files if this is the first selection
-    if (currentFiles.length === 0) {
-      currentFiles = newFiles.slice(0, 2);
-    } else {
-      // Add new files to current files, limit to 2
-      currentFiles = [...currentFiles, ...newFiles].slice(0, 2);
-    }
-    
-    if (currentFiles.length > 2) {
-      showNotification('warning', 'Warning', 'Maximum 2 images allowed. Only the first 2 will be used.');
-    }
-    
-    // Update preview
+    currentFiles = currentFiles.length === 0 ? newFiles.slice(0, 2) : [...currentFiles, ...newFiles].slice(0, 2);
+    if (currentFiles.length > 2) showNotification('warning', 'Warning', 'Max 2 images allowed.');
+
     updateFilePreviews(currentFiles, preview);
-    
-    // Update the actual file input (for form submission)
     updateFileInput(input, currentFiles);
   });
 }
 
 function updateFilePreviews(files, preview) {
   preview.innerHTML = '';
-  
   files.forEach((file, index) => {
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = e => {
         const item = document.createElement('div');
         item.className = 'file-preview-item';
-        
         const img = document.createElement('img');
         img.src = e.target.result;
         img.alt = `Preview ${index + 1}`;
-        
         const remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'remove-file';
         remove.innerHTML = '<i class="fas fa-times"></i>';
-        remove.onclick = () => removeFile(index, files, preview);
-        
+        remove.onclick = () => {
+          files.splice(index, 1);
+          updateFilePreviews(files, preview);
+          updateFileInput(document.getElementById('announcement-images-files'), files);
+        };
         item.append(img, remove);
         preview.appendChild(item);
       };
       reader.readAsDataURL(file);
     }
   });
-  
-  // Show file count
+
   if (files.length > 0) {
-    const countElement = document.createElement('div');
-    countElement.className = 'file-count';
-    countElement.style.marginTop = '10px';
-    countElement.style.fontSize = '14px';
-    countElement.style.color = '#666';
-    countElement.style.textAlign = 'center';
-    countElement.textContent = `${files.length}/2 images selected`;
-    preview.appendChild(countElement);
+    const count = document.createElement('div');
+    count.className = 'file-count';
+    count.textContent = `${files.length}/2 images selected`;
+    count.style.marginTop = '10px';
+    count.style.fontSize = '14px';
+    count.style.color = '#666';
+    preview.appendChild(count);
   }
 }
 
-function removeFile(index, files, preview) {
-  // Remove the file from the array
-  files.splice(index, 1);
-  
-  // Update preview
-  updateFilePreviews(files, preview);
-  
-  // Update the file input
-  const input = document.getElementById('announcement-images-files');
-  updateFileInput(input, files);
-}
-
 function updateFileInput(input, files) {
-  // Create a new FileList using DataTransfer
   const dataTransfer = new DataTransfer();
   files.forEach(file => dataTransfer.items.add(file));
   input.files = dataTransfer.files;
@@ -624,15 +600,12 @@ function updateFileInput(input, files) {
 function setupDragDrop(areaId, inputId) {
   const area = document.getElementById(areaId);
   const input = document.getElementById(inputId);
-  const preview = document.getElementById('announcement-images-preview');
-  
+  const preview = document.getElementById(inputId === 'announcement-images-files' ? 'announcement-images-preview' : 'edit-announcement-images-preview');
   if (!area || !input || !preview) return;
-  
-  let currentFiles = [];
-  
-  ['dragover', 'dragleave', 'drop'].forEach(evt => {
-    area.addEventListener(evt, e => e.preventDefault());
-  });
+
+  let currentFiles = inputId === 'announcement-images-files' ? [] : window.currentEditImages;
+
+  ['dragover', 'dragleave', 'drop'].forEach(evt => area.addEventListener(evt, e => e.preventDefault()));
   
   area.addEventListener('dragover', () => {
     area.style.borderColor = '#667eea';
@@ -650,20 +623,30 @@ function setupDragDrop(areaId, inputId) {
     
     if (e.dataTransfer.files.length) {
       const newFiles = Array.from(e.dataTransfer.files);
-      
-      // Reset or add to current files
-      if (currentFiles.length === 0) {
-        currentFiles = newFiles.slice(0, 2);
+      const max = 2;
+      const existing = inputId === 'edit-announcement-images-files' 
+        ? window.currentEditImages.filter(img => !img.file).length 
+        : currentFiles.length;
+      const toAdd = newFiles.slice(0, max - existing);
+
+      toAdd.forEach(file => {
+        if (inputId === 'edit-announcement-images-files') {
+          window.currentEditImages.push({ file });
+        } else {
+          currentFiles.push(file);
+        }
+      });
+
+      if (newFiles.length > (max - existing)) {
+        showNotification('warning', 'Limit', `Only ${max - existing} more image(s) allowed.`);
+      }
+
+      if (inputId === 'edit-announcement-images-files') {
+        displayEditImagePreviews();
       } else {
-        currentFiles = [...currentFiles, ...newFiles].slice(0, 2);
+        updateFilePreviews(currentFiles, preview);
+        updateFileInput(input, currentFiles);
       }
-      
-      if (currentFiles.length > 2) {
-        showNotification('warning', 'Warning', 'Maximum 2 images allowed. Only the first 2 will be used.');
-      }
-      
-      updateFilePreviews(currentFiles, preview);
-      updateFileInput(input, currentFiles);
     }
   });
 }
@@ -672,12 +655,9 @@ function setupDragDrop(areaId, inputId) {
 function resetForm() {
   document.getElementById('announcement-form').reset();
   document.getElementById('announcement-images-preview').innerHTML = '';
-  
-  // Reset file input
   const fileInput = document.getElementById('announcement-images-files');
   fileInput.value = '';
   fileInput.files = new DataTransfer().files;
-  
   clearFormErrors();
 }
 
@@ -702,6 +682,8 @@ function displayFormErrors(errors) {
     if (errorElement) {
       errorElement.textContent = error.msg;
       errorElement.style.display = 'block';
+    } else {
+      showNotification('error', 'Validation Error', `${error.path}: ${error.msg}`);
     }
   });
 }
@@ -729,17 +711,10 @@ function showSaveLoading(loading) {
   const saveText = document.getElementById('save-text');
   const saveLoading = document.getElementById('save-loading');
   const saveButton = document.getElementById('save-announcement');
-  
   if (saveText && saveLoading && saveButton) {
-    if (loading) {
-      saveText.style.display = 'none';
-      saveLoading.style.display = 'inline';
-      saveButton.disabled = true;
-    } else {
-      saveText.style.display = 'inline';
-      saveLoading.style.display = 'none';
-      saveButton.disabled = false;
-    }
+    saveText.style.display = loading ? 'none' : 'inline';
+    saveLoading.style.display = loading ? 'inline' : 'none';
+    saveButton.disabled = loading;
   }
 }
 
@@ -747,17 +722,10 @@ function showUpdateLoading(loading) {
   const updateText = document.getElementById('update-text');
   const updateLoading = document.getElementById('update-loading');
   const updateButton = document.getElementById('updateAnnouncement');
-  
   if (updateText && updateLoading && updateButton) {
-    if (loading) {
-      updateText.style.display = 'none';
-      updateLoading.style.display = 'inline';
-      updateButton.disabled = true;
-    } else {
-      updateText.style.display = 'inline';
-      updateLoading.style.display = 'none';
-      updateButton.disabled = false;
-    }
+    updateText.style.display = loading ? 'none' : 'inline';
+    updateLoading.style.display = loading ? 'inline' : 'none';
+    updateButton.disabled = loading;
   }
 }
 
@@ -765,17 +733,10 @@ function showDeleteLoading(loading) {
   const deleteText = document.getElementById('delete-text');
   const deleteLoading = document.getElementById('delete-loading');
   const deleteButton = document.getElementById('confirmDelete');
-  
   if (deleteText && deleteLoading && deleteButton) {
-    if (loading) {
-      deleteText.style.display = 'none';
-      deleteLoading.style.display = 'inline';
-      deleteButton.disabled = true;
-    } else {
-      deleteText.style.display = 'inline';
-      deleteLoading.style.display = 'none';
-      deleteButton.disabled = false;
-    }
+    deleteText.style.display = loading ? 'none' : 'inline';
+    deleteLoading.style.display = loading ? 'inline' : 'none';
+    deleteButton.disabled = loading;
   }
 }
 
@@ -787,11 +748,7 @@ function getAuthToken() {
 function formatDate(dateString) {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function escapeHtml(unsafe) {
@@ -804,7 +761,6 @@ function escapeHtml(unsafe) {
     .replace(/'/g, "&#039;");
 }
 
-// Simple notification function
 function showNotification(type, title, message) {
   console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
   alert(`${title}: ${message}`);

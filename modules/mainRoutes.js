@@ -3,6 +3,7 @@ const AdminAuthController = require("./admin/authController");
 const {PasswordResetController, updatePassword} = require("./admin/resetPasswordContorller");
 const {AuthMid} = require("../middlewares/adminAuth");
 const eventController = require("./admin/eventController");
+const  {getContentStats} = require("./admin/dashboard");
 const executiveController = require("./admin/execuController");
 const announcementController = require("./admin/announController");
 const createEventValidation = require("../middlewares/validations/createEventsVal");
@@ -11,10 +12,13 @@ const {createExecutiveValidation,updateImageValidation, updateStatusValidation} 
 const {
     handleUploadError, 
     uploadImage,
-    uploadMixedMedia
-
+    uploadMixedMedia,
+    uploadMultipleImages
 } = require("../middlewares/uploadMiddleware");
 const router = express.Router();
+
+// DASHBOARD
+router.get('/admin/stats', AuthMid, getContentStats);
 
 // AUTH
 router.post("/admin/signup", AdminAuthController().register);
@@ -46,14 +50,12 @@ router.patch('/ex/update-status/:id', AuthMid, updateStatusValidation, executive
 router.delete('/ex/delete/:id', AuthMid, executiveController.deleteExecutive);
 
 // ANOUN
-router.post('/a/create', AuthMid, createAnnouncementValidation, handleUploadError,announcementController.createAnnouncement);
+router.post('/a/create', AuthMid, uploadMultipleImages,handleUploadError,announcementController.createAnnouncement);
 router.get('/a/all', AuthMid, announcementController.getAllAnnouncements);
 router.get('/a/:id', AuthMid, announcementController.getAnnouncementById);
-router.patch('/a/update/:id', AuthMid, announcementController.updateAnnouncement);
+router.patch('/a/update/:id', AuthMid, uploadMultipleImages,handleUploadError, announcementController.updateAnnouncement);
 router.patch('/update-status/:id', AuthMid, updateStatusValidations, announcementController.updateAnnouncementStatus);
 router.patch('/a/toggle-importance/:id', AuthMid, announcementController.toggleAnnouncementImportance);
-router.patch('/a/add-image/:id', AuthMid, updateImageValidations, announcementController.addImageToAnnouncement);
-router.patch('/a/remove-image/:id',AuthMid,  announcementController.removeImageFromAnnouncement);
 router.delete('/a/delete/:id',AuthMid, announcementController.deleteAnnouncement);
 
 

@@ -19,14 +19,48 @@ const announcementController = {
         });
       }
 
-      const { title, content, images = [], isImportant = false, expiresAt = null } = req.body;
+      const { title, content,isImportant = false, expiresAt = null } = req.body;
+      console.log('Request files:', req.files);
+      console.log('Request body:', req.body);
+      
+      // Handle image uploads
+      const imageUrls = [];
+
+      // Case 1: req.files is an array
+      if (Array.isArray(req.files)) {
+        req.files.forEach(file => {
+          if (file.mimetype.startsWith('image/')) {
+            imageUrls.push(file.secure_url || file.path || file.location);
+          } 
+        });
+      } else if(req.files.images){
+        // Handle images
+        
+          const images = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+          images.forEach(file => {
+            if (file.mimetype.startsWith('image/')) {
+              imageUrls.push(file.secure_url || file.path || file.location);
+            }
+          });
+        
+      }else if(req.files.mimetype){
+        if (req.files.mimetype.startsWith('image/')) {
+          imageUrls.push(req.files.secure_url || req.files.path || req.files.location);
+        }
+      }
+
+      console.log('Processed image URLs:', imageUrls);
 
       const announcement = await Announcement.create({
         title,
         content,
-        images,
-        isImportant,
+        images: imageUrls,
+        isImportant: isImportant === 'true' || isImportant === true,
         expiresAt: expiresAt ? new Date(expiresAt) : null
+      });
+
+      console.log('Event created with media:', {
+          images: imageUrls.length
       });
 
       res.status(201).json({
@@ -57,56 +91,16 @@ const announcementController = {
       });
     }
   },
-
-  // GET /all - Get all announcements with filtering and pagination
+// GET /all - Get all announcements with filtering and pagination
   getAllAnnouncements: async (req, res) => {
     try {
-      const { 
-        page = 1, 
-        limit = 10, 
-        isActive = true,
-        isImportant,
-        showExpired = false,
-        sortBy = 'created_at',
-        sortOrder = 'DESC'
-      } = req.query;
-
-      const offset = (page - 1) * limit;
-      
-      // Build where clause
-      const whereClause = {};
-      
-      if (isActive !== undefined) whereClause.isActive = isActive === 'true';
-      if (isImportant !== undefined) whereClause.isImportant = isImportant === 'true';
-      
-      // Handle expired announcements filter
-      if (showExpired === 'false') {
-        whereClause[Op.or] = [
-          { expiresAt: null },
-          { expiresAt: { [Op.gt]: new Date() } }
-        ];
-      }
-
-      const { count, rows: announcements } = await Announcement.findAndCountAll({
-        where: whereClause,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order: [[sortBy, sortOrder.toUpperCase()]]
-      });
+ 
+      const announcements  = await Announcement.findAll({});
 
       res.json({
         success: true,
         message: 'Announcements retrieved successfully',
-        data: {
-          announcements,
-          pagination: {
-            currentPage: parseInt(page),
-            totalPages: Math.ceil(count / limit),
-            totalAnnouncements: count,
-            hasNext: offset + announcements.length < count,
-            hasPrev: page > 1
-          }
-        }
+        data: announcements
       });
 
     } catch (error) {
@@ -147,70 +141,133 @@ const announcementController = {
       });
     }
   },
-
-  // PATCH /update/:id - Update announcement details
+  
+  // PATCH /update/:id - Update announcement details with image upload
   updateAnnouncement: async (req, res) => {
     try {
       const { id } = req.params;
-      const { title, content, images, isImportant, expiresAt } = req.body;
-
-      // Check if at least one field is provided
-      if (title === undefined && content === undefined && images === undefined && 
-          isImportant === undefined && expiresAt === undefined) {
-        return res.status(400).json({
-          success: false,
-          message: 'At least one field must be provided for update'
-        });
-      }
-
+      const {
+        title,
+        content,
+        existingImages: existingImagesJson,
+        isImportant,
+        expiresAt,
+      } = req.body;
+      console.log(req.body)
+      // -----------------------------------------------------------------
+      // 1. Find the announcement
+      // -----------------------------------------------------------------
       const announcement = await Announcement.findByPk(id);
       if (!announcement) {
         return res.status(404).json({
           success: false,
-          message: 'Announcement not found'
+          message: 'Announcement not found',
         });
       }
 
-      // Prepare update data
+      // -----------------------------------------------------------------
+      // 2. Parse existing images (sent as JSON string by the client)
+      // -----------------------------------------------------------------
+      let keptImages = [];
+      if (existingImagesJson) {
+        try {
+          const parsed = JSON.parse(existingImagesJson);
+          if (Array.isArray(parsed)) {
+            keptImages = parsed.filter(url => typeof url === 'string' && url.trim());
+          }
+        } catch (e) {
+          console.warn('Invalid existingImages JSON:', existingImagesJson);
+          // ignore – we’ll just start with an empty list
+        }
+      }
+
+      // -----------------------------------------------------------------
+      // 3. Collect new uploaded files
+      // -----------------------------------------------------------------
+      const newFiles = [];
+      if (req.files) {
+        // Multer can give us:
+        //   - req.files.images  (array or single object)
+        //   - req.files        (array when field name is omitted)
+        const candidates = [];
+
+        if (Array.isArray(req.files.images)) {
+          candidates.push(...req.files.images);
+        } else if (req.files.images) {
+          candidates.push(req.files.images);
+        } else if (Array.isArray(req.files)) {
+          candidates.push(...req.files);
+        } else if (req.files && req.files.mimetype) {
+          candidates.push(req.files);
+        }
+
+        for (const file of candidates) {
+          if (file && file.mimetype && file.mimetype.startsWith('image/')) {
+            // Cloudinary / local storage – take the URL that was saved
+            const url = file.secure_url || file.path || file.location || file.filename;
+            if (url) newFiles.push(url);
+          }
+        }
+      }
+
+      // -----------------------------------------------------------------
+      // 4. Build final image list (max 2)
+      // -----------------------------------------------------------------
+      const finalImages = [...keptImages, ...newFiles].slice(0, 2);
+
+      // -----------------------------------------------------------------
+      // 5. Prepare data for Sequelize .update()
+      // -----------------------------------------------------------------
       const updateData = {};
+
       if (title !== undefined) updateData.title = title;
       if (content !== undefined) updateData.content = content;
-      if (images !== undefined) updateData.images = images;
-      if (isImportant !== undefined) updateData.isImportant = isImportant;
+      if (isImportant !== undefined) {
+        updateData.isImportant = isImportant === 'true' || isImportant === true;
+      }
       if (expiresAt !== undefined) {
         updateData.expiresAt = expiresAt ? new Date(expiresAt) : null;
       }
 
+      // Always replace the whole array – the DB column is JSON[]
+      updateData.images = finalImages;
+
+      // -----------------------------------------------------------------
+      // 6. Persist
+      // -----------------------------------------------------------------
       await announcement.update(updateData);
 
+      // -----------------------------------------------------------------
+      // 7. Respond
+      // -----------------------------------------------------------------
       res.json({
         success: true,
         message: 'Announcement updated successfully',
-        data: announcement
+        data: announcement,
       });
-
     } catch (error) {
       console.error('Update announcement error:', error);
-      
-      // Handle Sequelize validation errors
+
       if (error.name === 'SequelizeValidationError') {
         return res.status(400).json({
           success: false,
           message: 'Validation error',
           errors: error.errors.map(err => ({
             field: err.path,
-            message: err.message
-          }))
+            message: err.message,
+          })),
         });
       }
 
       res.status(500).json({
         success: false,
         message: 'Error updating announcement',
-        error: error.message
+        error: error.message,
       });
     }
   },
+
+
 
   // PATCH /update-status/:id - Update announcement active status
   updateAnnouncementStatus: async (req, res) => {
@@ -289,100 +346,6 @@ const announcementController = {
     }
   },
 
-  // PATCH /add-image/:id - Add image to announcement using model method
-  addImageToAnnouncement: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { image } = req.body;
-
-      if (!image) {
-        return res.status(400).json({
-          success: false,
-          message: 'Image URL is required'
-        });
-      }
-
-      const announcement = await Announcement.findByPk(id);
-      if (!announcement) {
-        return res.status(404).json({
-          success: false,
-          message: 'Announcement not found'
-        });
-      }
-
-      // Use the model's addImage method which includes validation
-      await announcement.addImage(image);
-
-      res.json({
-        success: true,
-        message: 'Image added to announcement successfully',
-        data: announcement
-      });
-
-    } catch (error) {
-      console.error('Add image to announcement error:', error);
-      
-      // Handle validation errors from model method
-      if (error.message.includes('Image URL must be a valid URL') || 
-          error.message.includes('Cannot add more than 2 images')) {
-        return res.status(400).json({
-          success: false,
-          message: 'Validation error',
-          error: error.message
-        });
-      }
-
-      res.status(500).json({
-        success: false,
-        message: 'Error adding image to announcement',
-        error: error.message
-      });
-    }
-  },
-
-  // PATCH /remove-image/:id - Remove image from announcement using model method
-  removeImageFromAnnouncement: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { imageUrl } = req.body;
-
-      if (!imageUrl) {
-        return res.status(400).json({
-          success: false,
-          message: 'imageUrl is required'
-        });
-      }
-
-      const announcement = await Announcement.findByPk(id);
-      if (!announcement) {
-        return res.status(404).json({
-          success: false,
-          message: 'Announcement not found'
-        });
-      }
-
-      // Delete image from Cloudinary
-      await deleteImage(imageUrl);
-
-      // Use the model's removeImage method
-      await announcement.removeImage(imageUrl);
-
-      res.json({
-        success: true,
-        message: 'Image removed from announcement successfully',
-        data: announcement
-      });
-
-    } catch (error) {
-      console.error('Remove image from announcement error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error removing image from announcement',
-        error: error.message
-      });
-    }
-  },
-
   // DELETE /delete/:id - Delete announcement and associated images
   deleteAnnouncement: async (req, res) => {
     try {
@@ -398,7 +361,9 @@ const announcementController = {
 
       // Delete associated images from Cloudinary
       if (announcement.images && announcement.images.length > 0) {
-        await deleteMultipleImages(announcement.images);
+        for (const imageUrl of announcement.images) {
+          await deleteMultipleImages(imageUrl);
+        }
       }
 
       // Delete announcement from database
