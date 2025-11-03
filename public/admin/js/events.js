@@ -24,19 +24,19 @@ function closeModal(modalId) {
   document.getElementById(modalId).classList.remove('active');
 }
 
-function getAuthHeaders() {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    showMessage('Error', 'Please log in again');
-    setTimeout(() => {
-      window.location.href = '../index.html';
-    }, 2000);
-    return null;
-  }
-  return {
-    'Authorization': `Bearer ${token}`
-  };
-}
+// function getAuthHeaders() {
+//   const token = localStorage.getItem('token');
+//   if (!token) {
+//     showMessage('Error', 'Please log in again');
+//     setTimeout(() => {
+//       window.location.href = '../index.html';
+//     }, 2000);
+//     return null;
+//   }
+//   return {
+//     'Authorization': `Bearer ${token}`
+//   };
+// }
 
 function showMessage(title, message) {
   const messageTitle = document.getElementById('messageTitle');
