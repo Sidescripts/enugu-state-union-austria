@@ -118,10 +118,7 @@
                     <li class="nav-item active">
                         <a href="./adminDash.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                     </li>
-                    <li class="nav-item"><a href="./users.html"><i class="fas fa-users"></i> Users</a></li>
-                    <li class="nav-item">
-                        <a href="management.html"><i class="fas fa-file-alt"></i> Management</a>
-                    </li>
+                    
                     <li class="nav-item"><a href="./events.html"><i class="fas fa-calendar"></i> Events</a></li>
                     <li class="nav-item"><a href="./announcements.html"><i class="fas fa-bullhorn"></i>
                             Announcements</a></li>
@@ -163,11 +160,11 @@
                     <p>Manage photos and videos from past events with captions and descriptions</p>
                     <div class="stats">
                         <div class="stat-item">
-                            <span class="stat-number">12</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Events</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">156</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Media</span>
                         </div>
                     </div>
@@ -183,11 +180,11 @@
                     <p>Create and manage upcoming events with details, images, and announcements</p>
                     <div class="stats">
                         <div class="stat-item">
-                            <span class="stat-number">5</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Events</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">3</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Active</span>
                         </div>
                     </div>
@@ -203,11 +200,11 @@
                     <p>Create and manage platform announcements with images, videos, and descriptions</p>
                     <div class="stats">
                         <div class="stat-item">
-                            <span class="stat-number">8</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Active</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">24</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Total</span>
                         </div>
                     </div>
@@ -223,11 +220,11 @@
                     <p>Manage executive team profiles with photos, positions, and biographies</p>
                     <div class="stats">
                         <div class="stat-item">
-                            <span class="stat-number">6</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Profiles</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">3</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Active</span>
                         </div>
                     </div>
@@ -237,7 +234,7 @@
         </main>
     </div>
 
-
+    <script src="../js/mainAuth.js"></script>
     <script>
         // Mobile sidebar functionality
         document.getElementById('menuToggle').addEventListener('click', function () {
@@ -265,6 +262,50 @@
             });
             document.querySelector('.notification-badge').style.display = 'none';
         });
+    </script>
+        <script>
+    async function loadDashboardStats() {
+        
+        try {
+            const authToken = localStorage.getItem("token");
+            const res = await fetch('/api/v1/admin/stats',{
+               headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if(res.status === 401){
+      setTimeout(() =>{
+        window.location.href = '../index.html'
+      },2500)
+    }
+        if (!res.ok) throw new Error('Failed to fetch');
+        const { data } = await res.json();
+            console.log(data)
+        // Past Events
+        document.querySelectorAll('.content-card')[0].querySelectorAll('.stat-number')[0].textContent = data.pastEvents.total;
+        document.querySelectorAll('.content-card')[0].querySelectorAll('.stat-number')[1].textContent = data.pastEvents.media;
+
+        // Upcoming Events
+        document.querySelectorAll('.content-card')[1].querySelectorAll('.stat-number')[0].textContent = data.upcomingEvents.total;
+        document.querySelectorAll('.content-card')[1].querySelectorAll('.stat-number')[1].textContent = data.upcomingEvents.active;
+
+        // Announcements
+        document.querySelectorAll('.content-card')[2].querySelectorAll('.stat-number')[0].textContent = data.announcements.active;
+        document.querySelectorAll('.content-card')[2].querySelectorAll('.stat-number')[1].textContent = data.announcements.total;
+
+        // Executives
+        document.querySelectorAll('.content-card')[3].querySelectorAll('.stat-number')[0].textContent = data.executives.total;
+        document.querySelectorAll('.content-card')[3].querySelectorAll('.stat-number')[1].textContent = data.executives.active;
+
+        } catch (err) {
+        console.error('Failed to load stats:', err);
+        }
+    }
+
+    // Load on DOM ready
+    document.addEventListener('DOMContentLoaded', loadDashboardStats);
     </script>
 </body>
 

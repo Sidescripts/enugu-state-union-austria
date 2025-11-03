@@ -21,8 +21,8 @@ const eventController = {
       const { title, description, date, featuredImage } = req.body;
 
 
-      console.log('Request files:', req.files);
-      console.log('Request body:', req.body);
+      // console.log('Request files:', req.files);
+      // console.log('Request body:', req.body);
 
       const imageUrls = [];
       const videoUrls = [];
@@ -39,7 +39,7 @@ const eventController = {
           }
         });
       }
-      // Case 2: req.files is an object with arrays (like from multer)
+        // Case 2: req.files is an object with arrays (like from multer)
       else if (req.files.images || req.files.videos) {
         // Handle images
         if (req.files.images) {
