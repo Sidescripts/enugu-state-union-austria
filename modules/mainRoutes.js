@@ -64,12 +64,12 @@ router.get('/user/events', eventController.getAllEvents);
 router.get('/user/events/:id', eventController.getEventById);
 
 // USER - announcements
-router.get('/user/active/announcements', AuthMid, announcementController.getActiveAnnouncements);
-router.get('/user/important/active', AuthMid, announcementController.getImportantActiveAnnouncements);
-router.get('/user/:id', AuthMid, announcementController.getAnnouncementById);
+router.get('/u/active/announcements', announcementController.getActiveAnnouncements);
+router.get('/u/important/announcement', announcementController.getImportantActiveAnnouncements);
+router.get('/user/:id', announcementController.getAnnouncementById);
 
 // USER - exec
-router.get('/user/active-board', executiveController.getActiveBoard);
+router.get('/u/board', executiveController.getActiveBoard);
 router.get('/user/:id', executiveController.getExecutiveById);
 
 module.exports = router;

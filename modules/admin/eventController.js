@@ -71,8 +71,8 @@ const eventController = {
       }
     }
 
-    console.log('Processed image URLs:', imageUrls);
-    console.log('Processed video URLs:', videoUrls);
+    // console.log('Processed image URLs:', imageUrls);
+    // console.log('Processed video URLs:', videoUrls);
 
 
 
@@ -92,10 +92,10 @@ const eventController = {
         status: status || 'recent'
       });
 
-      console.log('Event created with media:', {
-          images: imageUrls.length,
-          videos: videoUrls.length
-      });
+      // console.log('Event created with media:', {
+      //     images: imageUrls.length,
+      //     videos: videoUrls.length
+      // });
 
 
       res.status(201).json({
@@ -119,7 +119,7 @@ const eventController = {
     try {
       
       const event = await Event.findAll({})
-      console.log(event)
+      // console.log(event)
 
       res.json({
         success: true,
@@ -141,8 +141,8 @@ updateEvent: async (req, res) => {
     const { id } = req.params;
     const { title, description, date, status } = req.body;
 
-    console.log('Update request - Body:', req.body);
-    console.log('Update request - Files:', req.files);
+    // console.log('Update request - Body:', req.body);
+    // console.log('Update request - Files:', req.files);
 
     const event = await Event.findByPk(id);
     if (!event) {
@@ -198,7 +198,7 @@ updateEvent: async (req, res) => {
     // Set featured image to first image if available
     updateData.featuredImage = finalImages.length > 0 ? finalImages[0] : null;
 
-    console.log('Final update data:', updateData);
+    // console.log('Final update data:', updateData);
 
     await event.update(updateData);
 

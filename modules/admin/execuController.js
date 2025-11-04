@@ -34,7 +34,7 @@ const executiveController = {
         image:imageUrl,
         order: order || 0
       });
-      console.log(executive)
+      // console.log(executive)
       res.status(201).json({
         success: true,
         message: 'Executive created successfully',

@@ -11,9 +11,9 @@ const {notFound, errorHandler} = require("./middlewares/appMiddleware");
 const runMigrations = require("./utils/runMigrations");
 const app = express();
 
-console.log(process.env.CLOUDINARY_CLOUD_NAME)
-console.log(process.env.CLOUDINARY_API_KEY)
-console.log(process.env.CLOUDINARY_API_SECRET)
+// console.log(process.env.CLOUDINARY_CLOUD_NAME)
+// console.log(process.env.CLOUDINARY_API_KEY)
+// console.log(process.env.CLOUDINARY_API_SECRET)
 
 // init server
 let server;
