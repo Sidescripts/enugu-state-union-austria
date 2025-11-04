@@ -87,9 +87,7 @@ function AdminAuthController() {
         console.log(email, password)
         // Find admin
         const admin = await Admin.findOne({
-          // where: { email }
-          [Op.or]: [{ username }, { email }]
-
+          where: { email }
         });
 
         if (!admin) {
