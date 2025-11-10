@@ -20,8 +20,8 @@ const announcementController = {
       }
 
       const { title, content,isImportant = false, expiresAt = null } = req.body;
-      console.log('Request files:', req.files);
-      console.log('Request body:', req.body);
+      // console.log('Request files:', req.files);
+      // console.log('Request body:', req.body);
       
       // Handle image uploads
       const imageUrls = [];
@@ -49,7 +49,7 @@ const announcementController = {
         }
       }
 
-      console.log('Processed image URLs:', imageUrls);
+      // console.log('Processed image URLs:', imageUrls);
 
       const announcement = await Announcement.create({
         title,

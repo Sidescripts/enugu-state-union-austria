@@ -355,7 +355,7 @@ const executiveController = {
         order: [['order', 'ASC'], ['name', 'ASC']],
         attributes: ['id', 'name', 'position', 'bio', 'image', 'order']
       });
-      console.log(executives)
+      // console.log(executives)
       res.json({
         success: true,
         message: 'Active executive board retrieved successfully',

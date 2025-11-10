@@ -18,25 +18,50 @@ const imageCountSpan = document.getElementById('image-count');
 const videoCountSpan = document.getElementById('video-count');
 
 // ====================
+// REUSABLE BUTTON LOADING
+// ====================
+function setButtonLoading(button, loading = true) {
+  if (!button) return;
+
+  if (loading) {
+    // Save original content
+    if (!button.dataset.originalHtml) {
+      button.dataset.originalHtml = button.innerHTML;
+    }
+    button.classList.add('btn-loading');
+    button.disabled = true;
+    button.innerHTML = '<span>Processing...</span>';
+  } else {
+    // Restore
+    button.classList.remove('btn-loading');
+    button.disabled = false;
+    if (button.dataset.originalHtml) {
+      button.innerHTML = button.dataset.originalHtml;
+      delete button.dataset.originalHtml;
+    }
+  }
+}
+
+// ====================
 // UTILITY FUNCTIONS
 // ====================
 function closeModal(modalId) {
   document.getElementById(modalId).classList.remove('active');
 }
 
-// function getAuthHeaders() {
-//   const token = localStorage.getItem('token');
-//   if (!token) {
-//     showMessage('Error', 'Please log in again');
-//     setTimeout(() => {
-//       window.location.href = '../index.html';
-//     }, 2000);
-//     return null;
-//   }
-//   return {
-//     'Authorization': `Bearer ${token}`
-//   };
-// }
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showMessage('Error', 'Please log in again');
+    setTimeout(() => {
+      window.location.href = '../index.html';
+    }, 2000);
+    return null;
+  }
+  return {
+    'Authorization': `Bearer ${token}`
+  };
+}
 
 function showMessage(title, message) {
   const messageTitle = document.getElementById('messageTitle');
@@ -212,7 +237,7 @@ function createEventCard(event) {
   
   return cardHTML;
 }
-
+// saveEvent
 // ====================
 // CARD EVENT LISTENERS
 // ====================
@@ -358,6 +383,9 @@ function clearMedia() {
 // CREATE EVENT
 // ====================
 async function saveEvent() {
+  const saveBtn = document.getElementById('save-event');
+  setButtonLoading(saveBtn, true);
+
   const title = document.getElementById('event-title').value.trim();
   const date = document.getElementById('event-date').value;
   const description = document.getElementById('event-description').value.trim();
@@ -366,11 +394,12 @@ async function saveEvent() {
   // Validation
   if (!title || !date || !description) {
     showMessage('Error', 'Please fill in all required fields');
+    setButtonLoading(saveBtn, false);
     return;
   }
 
   const headers = getAuthHeaders();
-  if (!headers) return;
+  if (!headers) { setButtonLoading(saveBtn, false); return; }
 
   // Create FormData
   const formData = new FormData();
@@ -412,6 +441,7 @@ async function saveEvent() {
   } catch (error) {
     console.error('Error creating event:', error);
     showMessage('Error', 'Failed to create event: ' + error.message);
+    setButtonLoading(saveBtn, false);
   }
 }
 
@@ -421,9 +451,12 @@ async function saveEvent() {
 async function confirmDelete(eventId) {
   const confirmDelete = window.confirm('Are you sure you want to delete this event?');
   if (!confirmDelete) return;
+  const confirmBtn = document.getElementById('confirmAction');
+  setButtonLoading(confirmBtn, true);
 
   const headers = getAuthHeaders();
-  if (!headers) return;
+  if (!headers) { setButtonLoading(confirmBtn, false); return; }
+
 
   try {
     const response = await fetch(`${API_BASE}/delete/${eventId}`, {
@@ -435,12 +468,14 @@ async function confirmDelete(eventId) {
     
     if (result.success) {
       showMessage('Success', 'Event deleted successfully!');
+      closeModal('confirmationModal');
       loadEvents(); // Reload the events list
     } else {
       showMessage('Error', result.message || 'Failed to delete event');
     }
   } catch (error) {
     console.error('Error deleting event:', error);
+    setButtonLoading(confirmBtn, false);
     showMessage('Error', 'Failed to delete event: ' + error.message);
   }
 }

@@ -892,3 +892,45 @@ body {
     max-width: 100%;
   }
 }
+/* Button Loading State */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: button-spin 1s linear infinite;
+}
+
+@keyframes button-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Optional: Keep text + spinner */
+.btn-loading .btn-text {
+  visibility: hidden;
+}
+
+.btn-loading::before {
+  content: "Processing...";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.9rem;
+}

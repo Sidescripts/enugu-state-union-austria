@@ -127,5 +127,4 @@ function AdminAuthController() {
     }
   };
 }
-
 module.exports = AdminAuthController;
