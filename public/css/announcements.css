@@ -154,12 +154,17 @@
             color: white;
             padding: 15px 0;
             text-align: center;
-            margin-top: 4rem;
-            margin-bottom: 40px;
+            margin-top: 10px;
+            margin-bottom: 10px;
             border-radius: 10px;
             position: relative;
             overflow: hidden;
             animation: slideIn 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+       
         }
 
         .new-announcement-banner h3 {
@@ -181,6 +186,7 @@
             animation: pulse 2s infinite;
             animation: pulse 2s infinite;
             margin-right: 20px;
+            
         }
 
         /* Events Section */
@@ -508,7 +514,7 @@
             z-index: 10;
             animation: pulse 2s infinite;
             animation: pulse 2s infinite;
-            margin-left: 20px;
+            margin-left: 0px;
             margin-right: 0;
         }
 
