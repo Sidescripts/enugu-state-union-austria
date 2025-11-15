@@ -393,14 +393,14 @@ const announcementController = {
         sortBy = 'created_at',
         sortOrder = 'DESC'
       } = req.query;
-
-      const whereClause = {
-        isActive: true,
-        [Op.or]: [
-          { expiresAt: null },
-          { expiresAt: { [Op.gt]: new Date() } }
-        ]
-      };
+      const whereClause = {};
+      // const whereClause = {
+      //   isActive: true,
+      //   [Op.or]: [
+      //     { expiresAt: null },
+      //     { expiresAt: { [Op.gt]: new Date() } }
+      //   ]
+      // };
 
       if (importantOnly === 'true') {
         whereClause.isImportant = true;

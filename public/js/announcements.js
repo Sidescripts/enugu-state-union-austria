@@ -1,250 +1,3 @@
-// // Base API URL
-// const API_BASE = '/api/v1';
-
-// // DOM Elements
-// const upcomingAnnouncements = document.querySelector('#upcoming-announcements');
-// const pastAnnouncements = document.querySelector('#past-announcements');
-// const notificationBanner = document.querySelector('.new-announcement-banner');
-// const notificationDot = document.querySelector('.notification-dot');
-
-// document.addEventListener('DOMContentLoaded', async () => {
-//     // Dark/Light Mode Toggle
-//     document.getElementById('modeToggle')?.addEventListener('click', function () {
-//         const body = document.body;
-//         const icon = this.querySelector('i');
-//         if (body.classList.contains('light-mode')) {
-//             body.classList.remove('light-mode');
-//             body.classList.add('dark-mode');
-//             icon.classList.remove('fa-moon');
-//             icon.classList.add('fa-sun');
-//         } else {
-//             body.classList.remove('dark-mode');
-//             body.classList.add('light-mode');
-//             icon.classList.remove('fa-sun');
-//             icon.classList.add('fa-moon');
-//         }
-//     });
-
-//     // Smooth scrolling
-//     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-//         anchor.addEventListener('click', function (e) {
-//             e.preventDefault();
-//             const targetId = this.getAttribute('href');
-//             if (targetId === '#') return;
-//             const targetElement = document.querySelector(targetId);
-//             if (targetElement) {
-//                 window.scrollTo({
-//                     top: targetElement.offsetTop - 70,
-//                     behavior: 'smooth'
-//                 });
-//             }
-//         });
-//     });
-
-//     // Navbar scroll effect
-//     window.addEventListener('scroll', function () {
-//         const navbar = document.querySelector('.navbar');
-//         if (!navbar) return;
-//         if (window.scrollY > 50) {
-//             navbar.style.background = 'rgba(18, 18, 18, 0.95)';
-//             navbar.style.padding = '10px 0';
-//         } else {
-//             navbar.style.background = 'rgba(18, 18, 18, 0.95)';
-//             navbar.style.padding = '15px 0';
-//         }
-//     });
-
-//     // Load announcements
-//     await loadAnnouncements();
-// });
-
-// // ————————————————————————————————————————
-// // Load & Render Announcements (Aligned with Backend)
-// // ————————————————————————————————————————
-// async function loadAnnouncements() {
-//     try {
-//         // Show loading state
-//         if (upcomingAnnouncements) upcomingAnnouncements.innerHTML = '<p class="text-center text-muted">Loading...</p>';
-//         if (pastAnnouncements) pastAnnouncements.innerHTML = '';
-
-//         // Build query params to match backend
-//         const params = new URLSearchParams({
-//             limit: 10,
-//             importantOnly: false,
-//             sortBy: 'created_at',
-//             sortOrder: 'DESC'
-//         });
-
-//         const response = await fetch(`${API_BASE}/u/active/announcements?${params}`, {
-//             method: 'GET',
-//             headers: {
-//                 'Accept': 'application/json',
-//                 'Content-Type': 'application/json'
-//             },
-//             cache: 'no-cache'
-//         });
-
-//         if (!response.ok) {
-//             const error = await response.text();
-//             throw new Error(`HTTP ${response.status}: ${error}`);
-//         }
-
-//         const result = await response.json();
-
-//         if (!result.success) {
-//             throw new Error(result.message || 'Failed to load announcements');
-//         }
-
-//         const announcements = Array.isArray(result.data) ? result.data : [];
-
-//         if (announcements.length === 0) {
-//             if (upcomingAnnouncements) {
-//                 upcomingAnnouncements.innerHTML = '<p class="text-center text-muted">No active announcements.</p>';
-//             }
-//             return;
-//         }
-
-//         // Sort: important first, then by created_at DESC (backend already does this)
-//         const sorted = announcements.sort((a, b) => {
-//             if (a.is_important && !b.is_important) return -1;
-//             if (!a.is_important && b.is_important) return 1;
-//             return new Date(b.created_at) - new Date(a.created_at);
-//         });
-
-//         // Show notification banner if any important & recent
-//         const hasImportant = sorted.some(a => a.is_important);
-//         if (notificationBanner) {
-//             notificationBanner.style.display = hasImportant ? 'block' : 'none';
-//         }
-//         if (notificationDot && hasImportant) {
-//             notificationDot.style.display = 'inline-block';
-//             setTimeout(() => {
-//                 if (notificationDot) notificationDot.style.display = 'none';
-//             }, 5000);
-//         }
-
-//         // Clear containers
-//         if (upcomingAnnouncements) upcomingAnnouncements.innerHTML = '';
-//         if (pastAnnouncements) pastAnnouncements.innerHTML = '';
-
-//         // ——— UPCOMING: Top 2 ———
-//         const upcoming = sorted.slice(0, 2);
-//         if (upcoming.length === 0) {
-//             if (upcomingAnnouncements) {
-//                 upcomingAnnouncements.innerHTML = '<p class="text-center text-muted">No upcoming announcements.</p>';
-//             }
-//         } else {
-//             upcoming.forEach((ann, index) => {
-//                 const card = createUpcomingCard(ann, index === 0);
-//                 upcomingAnnouncements?.appendChild(card);
-//             });
-//         }
-
-//         // ——— PAST: Rest ———
-//         const past = sorted.slice(2);
-//         if (past.length === 0) {
-//             if (pastAnnouncements) {
-//                 pastAnnouncements.innerHTML = '<p class="text-center text-muted">No past announcements.</p>';
-//             }
-//         } else {
-//             past.forEach(ann => {
-//                 const card = createPastCard(ann);
-//                 pastAnnouncements?.appendChild(card);
-//             });
-//         }
-
-//     } catch (err) {
-//         console.error('Failed to load announcements:', err);
-//         const errorMsg = '<p class="text-center text-danger">Failed to load announcements. <a href="javascript:location.reload();" class="text-decoration-underline">Retry</a></p>';
-//         if (upcomingAnnouncements) upcomingAnnouncements.innerHTML = errorMsg;
-//         if (pastAnnouncements) pastAnnouncements.innerHTML = errorMsg;
-//     }
-// }
-
-// // ————————————————————————————————————————
-// // Card Creators (Safe HTML + Fallbacks)
-// // ————————————————————————————————————————
-// function escapeHTML(str) {
-//     const div = document.createElement('div');
-//     div.textContent = str || '';
-//     return div.innerHTML;
-// }
-
-// function getFirstImage(images) {
-//     if (!images || !Array.isArray(images)) return null;
-//     return images.find(img => img && img.trim()) || null;
-// }
-
-// function getPlaceholder(title) {
-//     const text = encodeURIComponent((title || 'A').substring(0, 2).toUpperCase());
-//     return `https://via.placeholder.com/300x200/a18cd1/ffffff?text=${text}`;
-// }
-
-// function createUpcomingCard(ann, isNew = false) {
-//     const card = document.createElement('div');
-//     card.className = 'col-lg-6 mb-4';
-
-//     const imageUrl = getFirstImage(ann.images) || getPlaceholder(ann.title);
-//     const dateStr = ann.expires_at
-//         ? new Date(ann.expires_at).toLocaleDateString()
-//         : 'Ongoing';
-
-//     card.innerHTML = `
-//         <div class="event-card ${ann.is_important ? 'important' : ''}">
-//             ${isNew ? '<span class="new-badge">NEW</span>' : ''}
-//             <div class="event-image">
-//                 <img src="${imageUrl}" 
-//                      alt="${escapeHTML(ann.title)}" 
-//                      loading="lazy"
-//                      onerror="this.src='${getPlaceholder(ann.title)}'">
-//             </div>
-//             <div class="event-content">
-//                 <span class="event-date">${dateStr}</span>
-//                 <h3 class="event-title">${escapeHTML(ann.title)}</h3>
-//                 <p class="event-description">${escapeHTML(ann.content.substring(0, 120))}${ann.content.length > 120 ? '...' : ''}</p>
-//                 <div class="event-meta">
-//                     <div class="event-time">
-//                         <i class="fas fa-clock"></i>
-//                         <span>${new Date(ann.created_at).toLocaleTimeString()}</span>
-//                     </div>
-//                 </div>
-//             </div>
-//         </div>
-//     `.trim();
-//     return card;
-// }
-
-// function createPastCard(ann) {
-//     const card = document.createElement('div');
-//     card.className = 'col-lg-6 mb-4';
-
-//     const imageUrl = getFirstImage(ann.images) || getPlaceholder(ann.title);
-
-//     card.innerHTML = `
-//         <div class="announcement-card">
-//             <span class="announcement-date">${new Date(ann.created_at).toLocaleDateString()}</span>
-//             <h3 class="announcement-title">${escapeHTML(ann.title)}</h3>
-//             <p class="announcement-content">${escapeHTML(ann.content)}</p>
-//             ${imageUrl ? `
-//             <div class="announcement-image">
-//                 <img src="${imageUrl}" 
-//                      alt="${escapeHTML(ann.title)}" 
-//                      loading="lazy"
-//                      onerror="this.src='${getPlaceholder(ann.title)}'">
-//             </div>` : ''}
-//         </div>
-//     `.trim();
-//     return card;
-// }
-
-// // ————————————————————————————————————————
-// // Email Validation (unchanged)
-// // ————————————————————————————————————————
-// function isValidEmail(email) {
-//     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     return re.test(email);
-// }
-
 
 /* ==============================================================
    announcements.js  –  fully aligned with backend + 2-image gallery
@@ -300,20 +53,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadAnnouncements();
 });
 
+
 /* ==============================================================
-   LOAD ANNOUNCEMENTS
+   LOAD ANNOUNCEMENTS – SPLIT INTO UPCOMING & PAST
    ============================================================== */
 async function loadAnnouncements() {
     try {
-        // loading state
+        // Loading state
         if (upcomingAnnouncements) upcomingAnnouncements.innerHTML = '<p class="text-center text-muted">Loading...</p>';
         if (pastAnnouncements)     pastAnnouncements.innerHTML = '';
 
+        // Fetch ALL announcements (no expiry filter)
         const params = new URLSearchParams({
-            limit: 10,
-            importantOnly: false,
-            sortBy: 'created_at',
-            sortOrder: 'DESC'
+            limit: 100,           // increase limit to get all (or use pagination later)
+            importantOnly: false
+            // sortBy/sortOrder left to backend
         });
 
         const response = await fetch(`${API_BASE}/u/active/announcements?${params}`, {
@@ -329,50 +83,71 @@ async function loadAnnouncements() {
 
         const result = await response.json();
         if (!result.success) throw new Error(result.message || 'Failed');
-
+        
         const announcements = Array.isArray(result.data) ? result.data : [];
 
         if (!announcements.length) {
-            if (upcomingAnnouncements) {
-                upcomingAnnouncements.innerHTML = '<p class="text-center text-muted">No active announcements.</p>';
-            }
+            const noDataMsg = '<p class="text-center text-muted">No announcements available.</p>';
+            if (upcomingAnnouncements) upcomingAnnouncements.innerHTML = noDataMsg;
+            if (pastAnnouncements)     pastAnnouncements.innerHTML = noDataMsg;
             return;
         }
 
-        // backend already sorts, but we keep a safe secondary sort
-        const sorted = announcements.sort((a, b) => {
+        const now = new Date(); // Current time: Nov 15, 2025 06:08 PM WAT
+
+        // Split into Upcoming & Past
+        const upcoming = [];
+        const past = [];
+
+        announcements.forEach(ann => {
+            const expiresAt = ann.expires_at ? new Date(ann.expires_at) : null;
+
+            // Push to correct bucket
+            if (!expiresAt || expiresAt > now) {
+                upcoming.push(ann);
+            } else {
+                past.push(ann);
+            }
+        });
+
+        // Sort each bucket: important first, then by created_at DESC
+        const sortFn = (a, b) => {
             if (a.is_important && !b.is_important) return -1;
             if (!a.is_important && b.is_important) return 1;
             return new Date(b.created_at) - new Date(a.created_at);
-        });
+        };
 
-        // notification banner / dot
-        const hasImportant = sorted.some(a => a.is_important);
+        upcoming.sort(sortFn);
+        past.sort(sortFn);
+
+        // Notification: show if any important in upcoming
+        const hasImportant = upcoming.some(a => a.is_important);
         if (notificationBanner) notificationBanner.style.display = hasImportant ? 'block' : 'none';
         if (notificationDot && hasImportant) {
             notificationDot.style.display = 'inline-block';
             setTimeout(() => notificationDot.style.display = 'none', 5000);
         }
 
-        // clear containers
+        // Clear containers
         if (upcomingAnnouncements) upcomingAnnouncements.innerHTML = '';
         if (pastAnnouncements)     pastAnnouncements.innerHTML = '';
 
-        /* ---------- UPCOMING (top 2) ---------- */
-        const upcoming = sorted.slice(0, 2);
-        if (upcoming.length) {
-            upcoming.forEach((ann, i) => {
+        /* ---------- UPCOMING (max 2) ---------- */
+        const displayUpcoming = upcoming.slice(0, 2);
+        if (displayUpcoming.length) {
+            displayUpcoming.forEach((ann, i) => {
                 upcomingAnnouncements?.appendChild(createUpcomingCard(ann, i === 0));
             });
-        } else if (upcomingAnnouncements) {
+        } else {
             upcomingAnnouncements.innerHTML = '<p class="text-center text-muted">No upcoming announcements.</p>';
         }
 
-        /* ---------- PAST (rest) ---------- */
-        const past = sorted.slice(2);
+        /* ---------- PAST (all) ---------- */
         if (past.length) {
-            past.forEach(ann => pastAnnouncements?.appendChild(createPastCard(ann)));
-        } else if (pastAnnouncements) {
+            past.forEach(ann => {
+                pastAnnouncements?.appendChild(createPastCard(ann));
+            });
+        } else {
             pastAnnouncements.innerHTML = '<p class="text-center text-muted">No past announcements.</p>';
         }
 

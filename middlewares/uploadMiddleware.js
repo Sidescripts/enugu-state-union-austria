@@ -6,7 +6,7 @@ const { imageStorage, videoStorage, generalStorage } = require('../utils/cloudin
 const uploadImage = multer({
   storage: imageStorage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB for images
+    fileSize: 15 * 1024 * 1024, // 15MB for images
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -20,7 +20,7 @@ const uploadImage = multer({
 const uploadVideo = multer({
   storage: videoStorage,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB for videos
+    fileSize: 500 * 1024 * 1024, // 500MB for videos
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('video/')) {
@@ -34,7 +34,7 @@ const uploadVideo = multer({
 const uploadAny = multer({
   storage: generalStorage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB general files
+    fileSize: 500 * 1024 * 1024, // 500MB general files
   }
 });
 
